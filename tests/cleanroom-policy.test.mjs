@@ -34,3 +34,16 @@ test('deny known legacy dependencies and files',()=>{
   if(/\.(?:mjs|cjs|js|jsx|ts|tsx)$/.test(r))assert.ok(!/(?:@supabase\/|@base44\/|NEXT_PUBLIC_SUPABASE_|SUPABASE_SERVICE_ROLE_KEY|HOME_HTML)/.test(readFileSync(p,'utf8')),r);
  }
 });
+
+test('three flagship pillars and dedicated lead finder remain explicit',()=>{
+ const pages=Object.fromEntries(contract.pages.map(p=>[p.route,p]));
+ assert.deepEqual(contract.product_pillars.map(p=>p.id),['avatar','invention','leads']);
+ assert.deepEqual(contract.product_pillars.map(p=>p.route),['/','/invention','/leads']);
+ for(const p of contract.product_pillars) assert.ok(pages[p.route],p.route);
+ assert.ok(contract.navigation.primary.includes('/leads'));
+ for(const f of ['natural-language lead search','source citations','qualification score','deduplication','pipeline status','Google Sheets export','reviewed outreach drafts']) assert.ok(pages['/leads'].features.includes(f),f);
+ for(const f of ['market validation','business plans','approval mockups','reviewed engineering handoff']) assert.ok(pages['/invention'].features.includes(f),f);
+ assert.match(contract.security.outreach,/no automatic sends/);
+ assert.ok(existsSync(new URL('docs/LEAD_FINDER.md', root)));
+ assert.ok(existsSync(new URL('docs/INVENTION_MACHINE.md', root)));
+});

@@ -42,6 +42,41 @@
       ]
     },
     {
+      "route": "/invention",
+      "label": "Invention Machine",
+      "features": [
+        "opportunity discovery",
+        "idea generation",
+        "market validation",
+        "business concepts",
+        "business plans",
+        "branding",
+        "visual concepts",
+        "approval mockups",
+        "reviewed engineering handoff",
+        "verified deliverables"
+      ]
+    },
+    {
+      "route": "/leads",
+      "label": "Lead Finder",
+      "features": [
+        "natural-language lead search",
+        "industry and geography filters",
+        "company and opportunity search",
+        "professional decision-makers",
+        "source citations",
+        "freshness",
+        "qualification score",
+        "deduplication",
+        "saved searches and lists",
+        "pipeline status",
+        "Google Sheets export",
+        "authorized CRM handoff",
+        "reviewed outreach drafts"
+      ]
+    },
+    {
       "route": "/workspace",
       "label": "Workspace",
       "features": [
@@ -128,11 +163,45 @@
     "production_cutover": "explicit approval and independent Guardian",
     "provider_calls": "server-side; least privilege; per-user consent; metering; receipt",
     "identity": "verified subject and tenant membership; no guessed account mapping",
-    "outreach": "reviewed and consent/compliance gated; no automatic sends from discovery",
+    "outreach": "approved and consent/compliance gated; no automatic sends from Lead Finder or Discovery; respect provider terms and suppression lists",
     "forbidden_runtime_dependencies": [
       "supabase",
       "base44"
     ],
     "deployment": "no automatic production promotion; existing resource limits preserved"
-  }
+  },
+  "product_pillars": [
+    {
+      "id": "avatar",
+      "label": "AI Avatar",
+      "route": "/"
+    },
+    {
+      "id": "invention",
+      "label": "Invention Machine",
+      "route": "/invention"
+    },
+    {
+      "id": "leads",
+      "label": "Lead Machine",
+      "route": "/leads"
+    }
+  ],
+  "navigation": {
+    "primary": [
+      "/",
+      "/invention",
+      "/leads",
+      "/workspace"
+    ],
+    "supporting": [
+      "/discovery",
+      "/create",
+      "/finished",
+      "/communications",
+      "/settings"
+    ],
+    "policy": "One shared app shell; discovery and creative tools are shared workspaces, not competing products. Final navigation requires design approval."
+  },
+  "module_policy": "All three pillars use the same Eden Core, Neon tenant boundary, Google Workspace, creative assets, communication adapters, and approval system. No independent brain, database, scheduler, or cloned legacy lead application."
 }
