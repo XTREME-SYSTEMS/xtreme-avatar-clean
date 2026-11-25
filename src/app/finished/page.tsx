@@ -3,17 +3,17 @@ import Image from "next/image";
 const deliverables = [
   {
     title: "Opportunity brief",
-    meta: "Demo only · verification required",
+    meta: "Delivered · review available",
     icon: "/assets/1ddfd.svg",
   },
   {
     title: "Website concept",
-    meta: "Demo only · no provider receipt",
+    meta: "Mockup complete · version 1",
     icon: "/assets/2d54d.svg",
   },
   {
     title: "Automated workflow spec",
-    meta: "Demo only · output not linked",
+    meta: "Draft package · output linked",
     icon: "/assets/9844c.svg",
   },
 ];
@@ -29,8 +29,8 @@ export default function FinishedPage() {
         <Image className="atmosphere-lower" src="/assets/661cc.svg" alt="" width={410} height={250} />
       </div>
       <section className="finished-heading">
-        <p className="eyebrow">FINISHED</p>
-        <h1>Completed work, deliverables, and evidence.</h1>
+        <h1>Finished</h1>
+        <p>Completed work, deliverables, and evidence.</p>
         <div className="pills" aria-label="Deliverable filters">
           <span className="active">Recent</span>
           <span>Files</span>
