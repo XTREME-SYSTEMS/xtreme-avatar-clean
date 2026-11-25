@@ -11,3 +11,5 @@
 Existing Foreman and project board may be retargeted only with verified repo admission and owner-approved release authority. Do not duplicate schedulers.
 
 - Lead Finder and Invention Machine are first-class modules in the same application. Reuse approved search, lead and CRM capabilities only after verified authorization, entitlement and data contracts. Store tenant-scoped prospect and invention records in existing Avatar Neon data, not shared personal memory. Use the existing scheduler for approved recurring searches only if execution is proven. No copied lead app, new memory authority, or automatic outbound campaigns.
+
+- Auto Social: reuse the existing Eden GPT Site and authorized typed MCP/API adapter. Verify identity, per-tenant scope and actual draft read/write receipts first. Publishing and scheduling remain blocked until platform-specific grants and delivery tests pass. Use existing Core/Neon and durable execution; no copied application, second scheduler or duplicate social records. See docs/AUTO_SOCIAL.md.

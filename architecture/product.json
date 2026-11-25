@@ -28,7 +28,14 @@
     "core_runtime": "existing Railway core-api",
     "google_cloud_project": "xps-operations-494914",
     "engineering": "existing authorized Eve/Foreman, outside Core",
-    "project_board": "https://github.com/orgs/XTREME-SYSTEMS/projects/3"
+    "project_board": "https://github.com/orgs/XTREME-SYSTEMS/projects/3",
+    "auto_social": {
+      "app": "Auto Social Eden GPT Site",
+      "site": "https://eden-auto-social.strategic-ai.chatgpt.site",
+      "mcp": "https://eden-auto-social.strategic-ai.chatgpt.site/mcp",
+      "access": "authenticated server-side adapter only after owner and tenant grants verified",
+      "runtime_status": "provider status reports drafts/records available; external publishing and scheduled delivery not connected"
+    }
   },
   "pages": [
     {
@@ -74,6 +81,23 @@
         "Google Sheets export",
         "authorized CRM handoff",
         "reviewed outreach drafts"
+      ]
+    },
+    {
+      "route": "/social",
+      "label": "Auto Social",
+      "features": [
+        "business and brand profiles",
+        "content strategy",
+        "campaign planning",
+        "AI copy and image drafts",
+        "platform-specific adaptations",
+        "versioned approval queue",
+        "content calendar",
+        "authorized publishing",
+        "delivery receipts",
+        "engagement analytics",
+        "lead and invention handoff"
       ]
     },
     {
@@ -168,7 +192,8 @@
       "supabase",
       "base44"
     ],
-    "deployment": "no automatic production promotion; existing resource limits preserved"
+    "deployment": "no automatic production promotion; existing resource limits preserved",
+    "social_publishing": "No external publishing until authorized platform OAuth, account and tenant binding, explicit versioned approval, idempotency, delivery receipts, and independent validation. Approved recurring campaigns only within bounded owner authorization."
   },
   "product_pillars": [
     {
@@ -185,6 +210,11 @@
       "id": "leads",
       "label": "Lead Machine",
       "route": "/leads"
+    },
+    {
+      "id": "social",
+      "label": "Auto Social",
+      "route": "/social"
     }
   ],
   "navigation": {
@@ -192,6 +222,7 @@
       "/",
       "/invention",
       "/leads",
+      "/social",
       "/workspace"
     ],
     "supporting": [
@@ -201,7 +232,7 @@
       "/communications",
       "/settings"
     ],
-    "policy": "One shared app shell; discovery and creative tools are shared workspaces, not competing products. Final navigation requires design approval."
+    "policy": "One shared app shell; four flagship modules, with Workspace and supporting capabilities accessible without separate applications. Final layout requires design approval."
   },
-  "module_policy": "All three pillars use the same Eden Core, Neon tenant boundary, Google Workspace, creative assets, communication adapters, and approval system. No independent brain, database, scheduler, or cloned legacy lead application."
+  "module_policy": "All four pillars use the same Eden Core, Neon tenant boundary, Google Workspace, creative assets, communication adapters, and approval system. No independent brain, database, scheduler, or cloned legacy lead application. Reuse existing Auto Social through a scoped adapter; no new social engine or duplicate scheduler."
 }

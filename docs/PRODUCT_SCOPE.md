@@ -2,13 +2,15 @@
 
 All capabilities are requirements, not claims of implemented functionality. Keep the existing approved Figma visual language, mobile/desktop navigation and Finished/Completion Center. Any new Discovery layouts are proposed until approved; do not regenerate the approved screens unnecessarily.
 
-## Three flagship product pillars
+## Four flagship product pillars
 
 **AI Avatar** is the conversational operating interface. **Invention Machine** turns validated opportunities into approved business concepts, plans, brands, mockups and verified deliverables. **Lead Machine** has a dedicated Lead Finder page (`/leads`) that turns authorized business research into qualified, actionable sales opportunities.
 
-These are modules of one application, not three separate products or runtimes. Workspace, Discovery, Create, Finished, Communications and Settings are shared supporting capabilities. Keep the navigation simple; preserve the approved design language and obtain approval for new screens.
+**Auto Social** is a dedicated social media workspace (`/social`) that lets Eden prepare, review, schedule and, once authorized provider delivery is verified, publish branded campaigns and report results.
 
-See [Lead Finder](LEAD_FINDER.md) and [Invention Machine](INVENTION_MACHINE.md).
+These are modules of one application, not four separate products or runtimes. Workspace, Discovery, Create, Finished, Communications and Settings are shared supporting capabilities. Keep the navigation simple; preserve the approved design language and obtain approval for new screens.
+
+See [Lead Finder](LEAD_FINDER.md), [Invention Machine](INVENTION_MACHINE.md) and [Auto Social](AUTO_SOCIAL.md).
 
 ## Workspace: full Google Workspace suite
 

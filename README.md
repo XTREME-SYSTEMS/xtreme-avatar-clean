@@ -4,7 +4,7 @@ New private application repository. This repository starts from a blank GitHub h
 
 The new application will use Next.js/TypeScript, the approved Figma design, existing Neon Auth and Neon application data, Eden Core V2 on Railway, OpenAI, Tavus, Twilio, Adobe and Google Workspace. Use existing provider resources and Foreman where verified; no duplicate brain, database or scheduler.
 
-Three flagship pillars: AI Avatar, [Invention Machine](docs/INVENTION_MACHINE.md) and [Lead Finder](docs/LEAD_FINDER.md). Google Workspace and the other capabilities are shared across them.
+Four flagship pillars: AI Avatar, [Invention Machine](docs/INVENTION_MACHINE.md), [Lead Finder](docs/LEAD_FINDER.md) and [Auto Social](docs/AUTO_SOCIAL.md). Google Workspace and the other capabilities are shared across them.
 
 Read [AGENTS.md](AGENTS.md), [product scope](docs/PRODUCT_SCOPE.md), [integration contract](docs/INTEGRATION_CONTRACT.md), [release gates](docs/RELEASE_GATES.md) and [architecture manifest](architecture/product.json).
 

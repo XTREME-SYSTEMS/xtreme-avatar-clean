@@ -35,10 +35,10 @@ test('deny known legacy dependencies and files',()=>{
  }
 });
 
-test('three flagship pillars and dedicated lead finder remain explicit',()=>{
+test('four flagship pillars and dedicated lead finder remain explicit',()=>{
  const pages=Object.fromEntries(contract.pages.map(p=>[p.route,p]));
- assert.deepEqual(contract.product_pillars.map(p=>p.id),['avatar','invention','leads']);
- assert.deepEqual(contract.product_pillars.map(p=>p.route),['/','/invention','/leads']);
+ assert.deepEqual(contract.product_pillars.map(p=>p.id),['avatar','invention','leads','social']);
+ assert.deepEqual(contract.product_pillars.map(p=>p.route),['/','/invention','/leads','/social']);
  for(const p of contract.product_pillars) assert.ok(pages[p.route],p.route);
  assert.ok(contract.navigation.primary.includes('/leads'));
  for(const f of ['natural-language lead search','source citations','qualification score','deduplication','pipeline status','Google Sheets export','reviewed outreach drafts']) assert.ok(pages['/leads'].features.includes(f),f);
@@ -46,4 +46,14 @@ test('three flagship pillars and dedicated lead finder remain explicit',()=>{
  assert.match(contract.security.outreach,/no automatic sends/);
  assert.ok(existsSync(new URL('docs/LEAD_FINDER.md', root)));
  assert.ok(existsSync(new URL('docs/INVENTION_MACHINE.md', root)));
+});
+
+test('reuse Auto Social with explicit delivery gates',()=>{
+ const social=contract.pages.find(p=>p.route==='/social');
+ for(const f of ['AI copy and image drafts','versioned approval queue','content calendar','authorized publishing','delivery receipts','engagement analytics']) assert.ok(social.features.includes(f),f);
+ assert.ok(contract.navigation.primary.includes('/social'));
+ assert.equal(contract.canonical.auto_social.site,'https://eden-auto-social.strategic-ai.chatgpt.site');
+ assert.match(contract.security.social_publishing,/No external publishing until/);
+ assert.match(contract.module_policy,/no new social engine or duplicate scheduler/);
+ assert.ok(existsSync(new URL('docs/AUTO_SOCIAL.md',root)));
 });
