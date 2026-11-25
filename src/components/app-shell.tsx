@@ -1,3 +1,7 @@
+"use client";
+
+import { usePathname } from "next/navigation";
+import { homeDesignAssets } from "@/lib/home-design-assets";
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -10,7 +14,15 @@ const bottom = [
   { href: "/settings", label: "More", icon: "/assets/56fad.svg" },
 ];
 
+const homeNavigationIcons: Record<string, string> = {
+  "/": homeDesignAssets.imgIconHome.src,
+  "/workspace": homeDesignAssets.imgIconLayers.src,
+  "/create": homeDesignAssets.imgIconCreate.src,
+  "/settings": homeDesignAssets.imgIconMore.src,
+};
+
 export function AppShell({ children }: { children: ReactNode }) {
+  const isApprovedHome = usePathname() === "/";
   return (
     <div className="app-frame">
       <header className="topbar">
@@ -24,7 +36,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <nav className="bottom-nav" aria-label="Mobile navigation">
         {bottom.map((item) => (
           <Link className={item.href === "/" ? "active" : undefined} href={item.href} key={item.href}>
-            <Image src={item.icon} alt="" width={28} height={28} />
+            <Image src={(isApprovedHome ? homeNavigationIcons[item.href] : undefined) ?? item.icon} alt="" width={28} height={28} />
             <span>{item.label}</span>
           </Link>
         ))}
