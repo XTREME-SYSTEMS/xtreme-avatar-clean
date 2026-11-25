@@ -1,0 +1,15 @@
+# Existing services, clean adapters
+
+- Application identity: existing Neon project delicate-scene-98135330, Neon Auth Better Auth. Verify branch-specific auth URL and issuer/JWKS through Neon API. Google social sign-in and Workspace data consent are separate flows; obtain the exact provider callback from the selected Neon Auth config. Never copy old Supabase OAuth credentials or legacy session code.
+- Application storage: same existing Avatar Neon project. Plan schema/identity migration using scoped roles, versioned SQL, isolated approved QA, and current resource quota. No production DB changes before approval.
+- Brain: Strategic-Minds-AI/eden-universal-core-v2, existing Railway core-api. Recheck PR #46, identity issue #47, receipt enforcement and deployed revision. Only call authenticated fixed-purpose server endpoints. Do not directly read shared memory from the frontend. Resolve subject/tenant mapping from actual authenticated records; do not silently reassign legacy memory.
+- Google Cloud: xps-operations-494914 existing Xtreme Avatar branding and clients. Verify the actual client and exact callback before reuse; register clean app Workspace callback only after new route and deployment are defined. Keep sign-in separate from per-user Workspace consent. Use PKCE/state, encrypted token storage, refresh/revocation and incremental least scopes.
+- OpenAI: primary API inference/voice/image provider, existing approved credentials, actual model/voice entitlement checks. Native ChatGPT Sol voice is not guaranteed on the external API. Tavus uses supported external audio rendering or a verified shared-Core integration; no independent competing memory. Twilio: signed callbacks and approved test traffic only.
+- Adobe, Figma: authorized creative operations and source-pinned approval assets. Persist exact approval revision and independent release decisions.
+- Deployment: use existing Vercel team and existing Neon resources, no automatic branch proliferation. Do not copy legacy environment files. New staging binding and production cutover are separate gated changes.
+
+Existing Foreman and project board may be retargeted only with verified repo admission and owner-approved release authority. Do not duplicate schedulers.
+
+- Lead Finder and Invention Machine are first-class modules in the same application. Reuse approved search, lead and CRM capabilities only after verified authorization, entitlement and data contracts. Store tenant-scoped prospect and invention records in existing Avatar Neon data, not shared personal memory. Use the existing scheduler for approved recurring searches only if execution is proven. No copied lead app, new memory authority, or automatic outbound campaigns.
+
+- Auto Social: reuse the existing Eden GPT Site and authorized typed MCP/API adapter. Verify identity, per-tenant scope and actual draft read/write receipts first. Publishing and scheduling remain blocked until platform-specific grants and delivery tests pass. Use existing Core/Neon and durable execution; no copied application, second scheduler or duplicate social records. See docs/AUTO_SOCIAL.md.
