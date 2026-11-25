@@ -1,0 +1,138 @@
+{
+  "schema_version": 1,
+  "application": "Xtreme Avatar",
+  "repository": "XTREME-SYSTEMS/xtreme-avatar-clean",
+  "status": "foundation_only",
+  "legacy": {
+    "repository": "XTREME-SYSTEMS/xtreme-avatar-platform",
+    "policy": "historical_reference_only; current production support until approved cutover; no imported application source, history, dependency manifests or secrets"
+  },
+  "canonical": {
+    "frontend_design": "https://www.figma.com/design/16F1Pcf7WN23HfBlBBx2Mf",
+    "completion_center_node": "42:545",
+    "identity": {
+      "provider": "Neon Auth / Managed Better Auth",
+      "project": "delicate-scene-98135330"
+    },
+    "application_database": {
+      "provider": "Neon",
+      "project": "delicate-scene-98135330"
+    },
+    "memory": {
+      "authority": "Eden Universal Core V2",
+      "repository": "Strategic-Minds-AI/eden-universal-core-v2",
+      "project": "divine-grass-10157171",
+      "access": "authenticated Core API only"
+    },
+    "host": "Vercel",
+    "core_runtime": "existing Railway core-api",
+    "google_cloud_project": "xps-operations-494914",
+    "engineering": "existing authorized Eve/Foreman, outside Core",
+    "project_board": "https://github.com/orgs/XTREME-SYSTEMS/projects/3"
+  },
+  "pages": [
+    {
+      "route": "/",
+      "label": "Home",
+      "features": [
+        "AI chat",
+        "live voice",
+        "Tavus avatar",
+        "conversation history"
+      ]
+    },
+    {
+      "route": "/workspace",
+      "label": "Workspace",
+      "features": [
+        "Gmail",
+        "Drive",
+        "Calendar",
+        "Docs",
+        "Sheets",
+        "Slides",
+        "Contacts",
+        "Tasks",
+        "Meet",
+        "Forms",
+        "Google Chat",
+        "Shared drives",
+        "Search and file management"
+      ]
+    },
+    {
+      "route": "/discovery",
+      "label": "Discovery",
+      "features": [
+        "business opportunities",
+        "leads",
+        "companies",
+        "professional decision-makers and leaders",
+        "public-source research",
+        "deduplication",
+        "qualification",
+        "saved searches",
+        "CRM handoff",
+        "reviewed outreach drafts"
+      ]
+    },
+    {
+      "route": "/create",
+      "label": "Create",
+      "features": [
+        "GPT Image",
+        "Adobe",
+        "Figma",
+        "plans",
+        "mockups"
+      ]
+    },
+    {
+      "route": "/finished",
+      "label": "Finished",
+      "features": [
+        "files",
+        "reports",
+        "approvals",
+        "versioned deliverables"
+      ]
+    },
+    {
+      "route": "/communications",
+      "label": "Communications",
+      "features": [
+        "Twilio voice",
+        "SMS",
+        "MMS",
+        "WhatsApp where supported",
+        "consent and delivery receipts"
+      ]
+    },
+    {
+      "route": "/settings",
+      "label": "Settings",
+      "features": [
+        "Neon authentication",
+        "connected accounts",
+        "permissions",
+        "budgets",
+        "audit",
+        "revocation"
+      ]
+    }
+  ],
+  "security": {
+    "new_brain": false,
+    "new_database": false,
+    "legacy_runtime": false,
+    "production_cutover": "explicit approval and independent Guardian",
+    "provider_calls": "server-side; least privilege; per-user consent; metering; receipt",
+    "identity": "verified subject and tenant membership; no guessed account mapping",
+    "outreach": "reviewed and consent/compliance gated; no automatic sends from discovery",
+    "forbidden_runtime_dependencies": [
+      "supabase",
+      "base44"
+    ],
+    "deployment": "no automatic production promotion; existing resource limits preserved"
+  }
+}
