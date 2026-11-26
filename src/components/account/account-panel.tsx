@@ -356,6 +356,7 @@ export function AccountPanel({ configured, googleError = false, googleReturn = f
         </>}
         <button className={styles.primary} type="submit" disabled={pending !== null}>{authMode === "sign-up" ? pending === "sign-up" ? "Creating account…" : "Create account" : pending === "sign-in" ? "Signing in…" : "Sign in"}</button>
       </form>
+      {authMode === "sign-in" && <Link className={styles.homeLink} href="/forgot-password">Forgot your password?</Link>}
     </section>}
 
     {googleLinkIssue && session.status === "anonymous" && <p className={styles.error} role="alert">Google linking was not confirmed. Sign in, then check your account’s Google connection status.</p>}
