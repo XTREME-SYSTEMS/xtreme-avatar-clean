@@ -16,7 +16,7 @@ function localStorageIfAvailable(): Storage | null {
   try { return window.localStorage; } catch { return null; }
 }
 
-export function ChatScreen() {
+export function ChatScreen({ mobile = false }: { mobile?: boolean } = {}) {
   const [connection, setConnection] = useState<Connection>("loading");
   const [notice, setNotice] = useState("Opening your conversation…");
   const [messages, setMessages] = useState<ChatHistoryTurn[]>([]);
@@ -127,9 +127,9 @@ export function ChatScreen() {
   }
 
   return <div className={`${styles.screen} phone-screen`}>
-    <Link href="/" className={styles.back}>← Home</Link>
+    <Link href={mobile ? "/mobile" : "/"} className={styles.back}>← Home</Link>
     <header className={styles.heading}><div><h1>Chat with Eden</h1><p>Your conversation, together with your workspace.</p></div><Link href="/account" className={styles.account}>Account</Link></header>
-    <div className={styles.modeLinks}><span aria-current="page">Chat</span><Link href="/voice">Voice</Link><Link href="/video">Video</Link></div>
+    <div className={styles.modeLinks}><span aria-current="page">Chat</span><Link href={mobile ? "/mobile/voice" : "/voice"}>Voice</Link><Link href={mobile ? "/mobile/video" : "/video"}>Video</Link></div>
     {notice && <div className={styles.notice} role="status">{notice}</div>}
     {connection === "loading" && <p className={styles.empty}>Checking your sign-in and workspace…</p>}
     {(connection === "access_denied" || connection === "not_connected") && <section className={styles.setup}>

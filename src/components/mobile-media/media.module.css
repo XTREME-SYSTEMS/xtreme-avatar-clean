@@ -1,0 +1,24 @@
+.screen { max-width: 32rem; min-height: 33rem; margin: 0 auto; padding: 22px 22px 42px; color: #f7f7f4; background: #0c0c0d; }
+.back { display: inline-block; padding: 12px 0; color: #cac9c5; font-size: 14px; text-decoration: none; }
+.stage, .videoStage { display: grid; place-items: center; min-height: 190px; height: clamp(190px, 28dvh, 260px); margin: 8px 0 24px; border-radius: 24px; border: 1px solid #373635; overflow: hidden; }
+.stage { background: radial-gradient(ellipse at 50% 50%, #3b3733, #1c1c1d 42%, #111112 72%); }
+.orbit { position: relative; width: 140px; height: 140px; transform: rotate(-29deg); }
+.orbit i { position: absolute; inset: 6% 15%; border: 2px solid #aaa298; border-top-color: #fff; border-bottom-color: #4f463c; border-radius: 50%; transform: rotate(18deg); box-shadow: inset 1px 1px 3px #d8c5a0, 1px 3px 12px #0009; }
+.orbit i:nth-child(2) { inset: 12% 22%; transform: rotate(55deg); }
+.orbit i:nth-child(3) { inset: 25% 4%; transform: rotate(-19deg); }
+.videoStage { background: linear-gradient(0deg,#10101240,transparent 50%), #202022 url('/mobile-art/eden-video.webp') center 35%/cover no-repeat; }
+.body { display: grid; gap: 14px; }
+.body h1, .body p { margin: 0; }
+.body h1 { font-family: "Avatar Serif", Georgia, serif; font-size: clamp(38px, 9vw, 54px); line-height: 1.05; font-weight: 400; letter-spacing: -.04em; }
+.body p { color: #d0cec9; line-height: 1.55; font-size: 15px; }
+.body p.mode { color: #d4bb8e; font-size: 11px; letter-spacing: .18em; font-weight: 650; }
+.body small { color: #aaa8a4; font-size: 12px; line-height: 1.5; }
+.controls { display: flex; gap: 10px; flex-wrap: wrap; }
+.primary, .secondary { display: inline-flex; min-height: 48px; align-items: center; justify-content: center; padding: 10px 20px; line-height: 1.4; font-family: inherit; font-size: 15px; font-weight: 600; border-radius: 16px; text-decoration: none; cursor: pointer; }
+.primary { color: #191610; background: #e2cda6; border: 1px solid #e2cda6; }
+.secondary { color: #ebe9e4; border: 1px solid #56534d; background: #222222; }
+.secondary:disabled { opacity: .55; cursor: default; }
+.player { width: 100%; }
+.player:not([controls]) { display: none; }
+.detail { color: #bcbab4; font-size: 12px; line-height: 1.7; overflow-wrap: anywhere; }
+.screen :focus-visible { outline: 2px solid #e5c28f; outline-offset: 4px; }

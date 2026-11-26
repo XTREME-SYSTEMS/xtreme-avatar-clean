@@ -6,7 +6,7 @@ import { callCoreChat } from "./transport.ts";
 type IdentityResult =
   | { status: "authenticated"; identity: VerifiedNeonIdentity }
   | { status: "anonymous" | "membership_required" | "access_denied" | "unavailable"; code?: string };
-type Dependencies = {
+export type CoreRequestDependencies = {
   getIdentity: () => Promise<IdentityResult>;
   env: Record<string, string | undefined>;
   fetch?: typeof fetch;
@@ -31,7 +31,7 @@ export function isSameOrigin(request: Request, expected: string | undefined): bo
 }
 
 /** A fixed-purpose BFF. The browser never provides an upstream URL, bearer, user or tenant. */
-export async function handleChatRequest(request: Request, dependencies: Dependencies): Promise<Response> {
+export async function handleChatRequest(request: Request, dependencies: CoreRequestDependencies): Promise<Response> {
   if (request.method !== "GET" && request.method !== "POST") return failure("failed", "method_not_allowed", "This action is not supported.", 405);
   if (request.method === "POST" && !isSameOrigin(request, dependencies.env.AVATAR_APP_ORIGIN)) return failure("access_denied", "invalid_origin", "Open this app's own page before sending a message.", 403);
   if (request.method === "POST" && !/^application\/json(?:\s*;|$)/i.test(request.headers.get("content-type") ?? "")) return failure("failed", "invalid_input", "Send a JSON message.", 400);

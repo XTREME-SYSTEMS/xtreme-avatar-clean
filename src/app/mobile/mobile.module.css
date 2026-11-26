@@ -1,0 +1,63 @@
+@font-face { font-family: Avatar Inter; src: url("/mobile-art/fonts/inter.woff2") format("woff2"); font-style: normal; font-weight: 100 900; font-display: swap; }
+@font-face { font-family: Avatar Serif; src: url("/mobile-art/fonts/instrument-serif.woff2") format("woff2"); font-style: normal; font-weight: 400; font-display: swap; }
+.canvas {
+  --ivory: #f4f1ea; --muted: #b6b3ac; --gold: #ddc18a; --edge: #393936;
+  --metal-silver: #191a19; --metal-gold: #5f4f32;
+  min-height: 100svh; color: var(--ivory); background: #0d0e0e; font: 400 16px/1.45 "Avatar Inter", system-ui, sans-serif;
+}
+.shell {
+  width: min(100%, 32rem); position: relative; isolation: isolate; margin-inline: auto;
+  min-height: 100svh; min-height: 100dvh; display: flex; flex-direction: column;
+  padding: env(safe-area-inset-top) max(24px, env(safe-area-inset-right)) 0 max(24px, env(safe-area-inset-left));
+  background: #101112;
+}
+.shell::before {
+  position: absolute; inset: 0; z-index: -1; content: ""; pointer-events: none;
+  background: url("/mobile-art/brushed-metal.svg") top center / 100% 100% no-repeat; opacity: .32;
+}
+.brandBar { display: flex; align-items: center; min-height: 84px; }
+.brandBar a { display: inline-flex; gap: 9px; align-items: center; min-height: 44px; font-size: 11px; font-weight: 650; letter-spacing: .22em; }
+.brandBar img { width: 26px; height: 26px; }
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.home { flex: 1; display: flex; flex-direction: column; padding-bottom: 30px; }
+.art { flex: 1 1 auto; display: grid; min-height: 155px; max-height: 260px; align-items: center; justify-items: center; }
+.art img { display: block; max-width: 100%; width: 340px; height: clamp(140px, 24dvh, 204px); object-fit: contain; }
+.intro { padding: 18px 0 0; }
+.kicker { color: var(--gold); margin: 0 0 12px; text-transform: uppercase; font-size: 10px; line-height: 1.4; letter-spacing: .2em; font-weight: 650; }
+.intro h1, .inner h1 {
+  margin: 0; font: 400 clamp(54px, 16vw, 74px)/1.04 "Avatar Serif", Georgia, serif; letter-spacing: -.033em;
+}
+.sub { margin: 10px 0 0; color: var(--muted); font-size: 16px; line-height: 1.5; }
+.actions { display: grid; gap: 11px; margin-top: clamp(22px, 5dvh, 45px); }
+.primary, .secondary, .composer {
+  display: flex; gap: 12px; align-items: center; justify-content: center; min-height: 54px;
+  padding: 11px 16px; border: 1px solid var(--edge); border-radius: 16px;
+  background: #181918; color: var(--ivory); font-size: 15px; font-weight: 560;
+}
+.primary { color: #171510; background: var(--gold); border-color: var(--gold); }
+.secondary svg, .round { color: var(--gold); }
+.composer { margin-top: 17px; color: var(--muted); justify-content: flex-start; font-size: 14px; font-weight: 400; }
+.canvas a:focus-visible, .canvas button:focus-visible { outline: 2px solid #e7cd99; outline-offset: 3px; }
+.primary:hover { background: #ecd3a3; }
+.secondary:hover, .composer:hover, .row:hover { background: #242523; }
+.tabs { position: sticky; bottom: 0; z-index: 5; display: flex; align-items: stretch; justify-content: space-between; border-top: 1px solid var(--edge); background: #101112; padding: 8px 0 max(9px,env(safe-area-inset-bottom)); }
+.tabs a { flex: 1; min-height: 54px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; color: var(--muted); font-size: 11px; }
+.tabs a[aria-current] { color: var(--gold); font-weight: 650; }
+.tabs svg, .primary svg, .secondary svg, .composer svg { width: 20px; height: 20px; }
+.inner { padding: clamp(19px,5.6vh,52px) 0 38px; }
+.inner h1 { font-size: clamp(49px,14vw,65px); }
+.rows { display: grid; margin-top: 32px; }
+.row { display: grid; grid-template-columns: 46px 1fr 16px; align-items: center; gap: 14px; padding: 20px 1px; border-bottom: 1px solid var(--edge); }
+.row:first-child { border-top: 1px solid var(--edge); }
+.round { display: grid; place-items: center; width: 44px; height: 44px; background: #1b1c1b; border: 1px solid #45423b; border-radius: 15px; }
+.row strong, .row small { display: block; }
+.row small { margin-top: 4px; color: var(--muted); font-size: 13px; }
+.row > svg { width: 16px; color: var(--muted); }
+.info { margin: 24px 0; padding: 20px; border: 1px solid var(--edge); border-radius: 16px; }
+.info svg { color: var(--gold); }
+.info h2 { margin: 9px 0 7px; font-size: 18px; }
+.info p { margin: 0; color: var(--muted); }
+@media (min-width: 600px) { .shell { border-inline: 1px solid #272724; padding-inline: 36px; } }
+@media (max-height: 690px) { .brandBar { min-height: 62px; } .art { min-height: 125px; } .art img { height: 135px; } .intro { padding-top: 4px; } .home { padding-bottom: 17px; } .composer { margin-top: 4px; } }
+
+.install { margin-left: auto; min-height: 44px; border: 0; background: transparent; color: var(--gold); font: 550 13px "Avatar Inter", system-ui, sans-serif; cursor: pointer; }
