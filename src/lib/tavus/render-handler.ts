@@ -75,12 +75,15 @@ export async function handleTavusRender(request: Request, deps: Dependencies) {
       const room = await store.requestClose(scopeId, requestId);
       if (!room) return fail("tavus_render_room_not_found", 404);
       if (room.ended) return privateJson({ status: "ended" });
-      if (!room.conversationId) return privateJson({ status: "closing" }, 202);
-      if (!room.ended) {
-        if (!await provider.end(room.conversationId)) throw new Error("Tavus end failed");
-        await store.markEnded(scopeId, requestId);
-        deps.audit("ended", requestId);
+      const conversationId = room.conversationId ?? await provider.findActiveRoom(scopeId, requestId);
+      if (!conversationId) return privateJson({ status: "closing" }, 202);
+      if (!room.conversationId) {
+        // If the receipt store is still recovering, close the exact matched room anyway.
+        await store.saveRoom(scopeId, requestId, conversationId).catch(() => null);
       }
+      if (!await provider.end(conversationId)) throw new Error("Tavus end failed");
+      await store.markEnded(scopeId, requestId);
+      deps.audit("ended", requestId);
       return privateJson({ status: "ended" });
     } catch {
       deps.audit("end_unconfirmed", requestId);
@@ -109,7 +112,7 @@ export async function handleTavusRender(request: Request, deps: Dependencies) {
   let conversationId: string | null = null;
   let saved: { cancelled: boolean } | null = null;
   try {
-    const created = await provider.create(requestId);
+    const created = await provider.create(scopeId, requestId);
     conversationId = created.conversationId;
     if (conversationId) saved = await store.saveRoom(scopeId, requestId, conversationId);
     if (!created.room || !saved || saved.cancelled || request.signal.aborted) throw new Error("Unusable Tavus room");

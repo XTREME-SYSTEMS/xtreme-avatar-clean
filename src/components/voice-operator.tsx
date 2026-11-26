@@ -12,6 +12,10 @@ import styles from "./voice-operator.module.css";
 
 type Phase = "idle" | "opening" | "connected" | "closing";
 type Availability = "checking" | "ready" | "anonymous" | "unavailable";
+type CanvasReview = {
+  id: symbol; scope: string; revision: number; command: CanvasCommand; expiresAt: number;
+  timer: ReturnType<typeof setTimeout>;
+};
 type VoiceControls = {
   phase: Phase; availability: Availability; muted: boolean; message: string; transcript: string;
   review: string; confirm: () => void; cancel: () => void;
@@ -21,6 +25,21 @@ type VoiceControls = {
 
 const VoiceContext = createContext<VoiceControls | null>(null);
 const endpoint = "/api/eden/gateway-live";
+const reviewDurationMs = 25_000;
+
+async function checkVoiceAccess(): Promise<{ availability: Availability; scope: string }> {
+  try {
+    const response = await fetch(endpoint, { credentials: "same-origin", cache: "no-store", signal: AbortSignal.timeout(9000) });
+    if (response.status === 401) return { availability: "anonymous", scope: "" };
+    if (response.ok) {
+      const reply = await response.json();
+      if (typeof reply.scopeId === "string" && /^[a-f0-9]{64}$/.test(reply.scopeId) && reply.voice === "gleam") {
+        return { availability: "ready", scope: reply.scopeId };
+      }
+    }
+  } catch { /* The workspace could not be verified. */ }
+  return { availability: "unavailable", scope: "" };
+}
 
 function sendCanvasCommand(command: CanvasCommand) {
   let reply: CanvasCommandResult | undefined;
@@ -68,8 +87,8 @@ export function VoiceOperator({ children }: { children: ReactNode }) {
   const [muted, setMuted] = useState(false);
   const [message, setMessage] = useState("");
   const [transcript, setTranscript] = useState("");
-  const [reviewLabel, setReviewLabel] = useState("");
-  const review = useRef<{ scope: string; snapshot: string; command: CanvasCommand; timer: ReturnType<typeof setTimeout> } | null>(null);
+  const [displayedReview, setDisplayedReview] = useState<{ id: symbol; label: string } | null>(null);
+  const review = useRef<CanvasReview | null>(null);
   const connection = useRef<GatewayLiveConnection | null>(null);
   const audioSink = useRef<((pcm: string) => void) | null>(null);
   const scope = useRef("");
@@ -82,7 +101,7 @@ export function VoiceOperator({ children }: { children: ReactNode }) {
   const cancel = useCallback(() => {
     clearTimeout(review.current?.timer);
     review.current = null;
-    setReviewLabel("");
+    setDisplayedReview(null);
   }, []);
 
   useEffect(() => () => { if (pathname === "/create") cancel(); }, [pathname, cancel]);
@@ -110,18 +129,7 @@ export function VoiceOperator({ children }: { children: ReactNode }) {
     };
     const refresh = async () => {
       const check = ++version;
-      let next: Availability = "unavailable";
-      let nextScope = "";
-      try {
-        const response = await fetch(endpoint, { credentials: "same-origin", cache: "no-store", signal: AbortSignal.timeout(9000) });
-        if (response.status === 401) next = "anonymous";
-        if (response.ok) {
-          const reply = await response.json();
-          if (typeof reply.scopeId === "string" && /^[a-f0-9]{64}$/.test(reply.scopeId) && reply.voice === "gleam") {
-            nextScope = reply.scopeId; next = "ready";
-          }
-        }
-      } catch { /* Active sessions close when their workspace can no longer be verified. */ }
+      const { availability: next, scope: nextScope } = await checkVoiceAccess();
       if (!mounted || version !== check) return;
       if (scope.current && scope.current !== nextScope) scrub();
       scope.current = nextScope;
@@ -155,15 +163,24 @@ export function VoiceOperator({ children }: { children: ReactNode }) {
     };
   }, [enabled, cancel]);
 
-  function confirm() {
+  async function confirm(id: symbol | undefined) {
     const draft = review.current;
+    if (!draft || draft.id !== id) return;
+    const call = connection.current;
+    const verified = await checkVoiceAccess();
+    if (review.current !== draft) return;
     cancel();
-    if (!draft || window.location.pathname !== "/create" || scope.current !== draft.scope || !connection.current) {
-      return "There is no pending canvas change to confirm.";
+    if (performance.now() >= draft.expiresAt || window.location.pathname !== "/create" || !call || connection.current !== call ||
+        scope.current !== draft.scope || verified.scope !== draft.scope) {
+      setMessage("This canvas approval is no longer valid. Please repeat the edit.");
+      return;
     }
     const current = sendCanvasCommand({ type: "get_state" });
-    if (!current?.ok || JSON.stringify(current.state) !== draft.snapshot) return "The canvas changed. Please repeat the edit.";
-    return canvasMessage(sendCanvasCommand(draft.command), false);
+    if (!current?.ok || current.state.revision !== draft.revision) {
+      setMessage("The canvas changed. Please repeat the edit.");
+      return;
+    }
+    setMessage(canvasMessage(sendCanvasCommand(draft.command), false));
   }
 
   function start() {
@@ -179,7 +196,7 @@ export function VoiceOperator({ children }: { children: ReactNode }) {
         if (!action) return "No supported app command was recognized. No action ran.";
         const path = window.location.pathname;
         if (action.type === "read_page") return "The current page is " + pageName(path) + ".";
-        if (action.type === "confirm_canvas") return confirm();
+        if (action.type === "confirm_canvas") return "Review the proposed edit and press Confirm canvas change to apply it.";
         if (action.type === "cancel_canvas") { cancel(); return "The pending canvas change is cancelled."; }
         if (action.type === "navigate") {
           if (action.path === path) return "This page is already open.";
@@ -195,9 +212,13 @@ export function VoiceOperator({ children }: { children: ReactNode }) {
         const current = sendCanvasCommand({ type: "get_state" });
         if (!current?.ok) return "The editor was unavailable. No canvas action ran.";
         const label = describeChange(action.command);
-        review.current = { scope: startScope, snapshot: JSON.stringify(current.state), command: action.command, timer: setTimeout(cancel, 25_000) };
-        setReviewLabel(label);
-        return `Proposed canvas change: ${label}. Nothing has been edited yet. Ask the user to confirm canvas change.`;
+        const id = Symbol();
+        review.current = {
+          id, scope: startScope, revision: current.state.revision, command: action.command,
+          expiresAt: performance.now() + reviewDurationMs, timer: setTimeout(cancel, reviewDurationMs),
+        };
+        setDisplayedReview({ id, label });
+        return `Proposed canvas change: ${label}. Ask the user to press Confirm canvas change.`;
       },
       update: (event) => {
         if (connection.current !== call) return;
@@ -223,7 +244,7 @@ export function VoiceOperator({ children }: { children: ReactNode }) {
     setMuted(next);
   };
   return <VoiceContext.Provider value={{ availability, phase, muted, message, transcript, start, stop, toggleMute, getScope, receiveAudio,
-    review: reviewLabel, confirm: () => setMessage(confirm()), cancel }}>
+    review: displayedReview?.label ?? "", confirm: () => { void confirm(displayedReview?.id); }, cancel }}>
     {children}
     {!voicePage && (!authPage || phase !== "idle") && <div className={styles.launcher}>
       {open ? <section className={styles.popup} aria-label="Persistent Eden voice">

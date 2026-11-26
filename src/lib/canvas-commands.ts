@@ -19,6 +19,7 @@ export type CanvasCommand =
   | { type: "redo" };
 
 export type CanvasSnapshot = {
+  revision: number;
   objects: CanvasTextObject[];
   selectedId: string | null;
   canUndo: boolean;
@@ -37,6 +38,7 @@ type CanvasDocument = {
 };
 
 type CanvasEditorState = {
+  readonly revision: number;
   readonly present: CanvasDocument;
   readonly past: readonly CanvasDocument[];
   readonly future: readonly CanvasDocument[];
@@ -44,7 +46,7 @@ type CanvasEditorState = {
 };
 
 export function createCanvasState(): CanvasEditorState {
-  return { present: { objects: [], selectedId: null }, past: [], future: [], nextId: 1 };
+  return { revision: 0, present: { objects: [], selectedId: null }, past: [], future: [], nextId: 1 };
 }
 
 function readRecord(value: unknown): Record<string, unknown> | null {
@@ -132,22 +134,27 @@ export function applyCanvasCommand(state: CanvasEditorState, input: unknown): Tr
   const { objects, selectedId } = state.present;
   const fail = (error: Extract<CanvasCommandResult, { ok: false }>["error"]): Transition =>
     ({ state, result: { ok: false, error } });
-  const success = (next: CanvasEditorState, objectId: string | null = null): Transition => ({
-    state: next,
-    result: {
-      ok: true,
-      changed: next !== state,
-      objectId,
-      state: {
-        objects: next.present.objects.map(object => ({ ...object })),
-        selectedId: next.present.selectedId,
-        canUndo: next.past.length > 0,
-        canRedo: next.future.length > 0,
+  const success = (next: CanvasEditorState, objectId: string | null = null): Transition => {
+    const changed = next !== state;
+    const revision = changed ? state.revision + 1 : state.revision;
+    return {
+      state: changed ? { ...next, revision } : state,
+      result: {
+        ok: true,
+        changed,
+        objectId,
+        state: {
+          revision,
+          objects: next.present.objects.map(object => ({ ...object })),
+          selectedId: next.present.selectedId,
+          canUndo: next.past.length > 0,
+          canRedo: next.future.length > 0,
+        },
       },
-    },
-  });
+    };
+  };
   const edit = (present: CanvasDocument, objectId: string, nextId = state.nextId) =>
-    success({ present, past: [...state.past, state.present].slice(-HISTORY_LIMIT), future: [], nextId }, objectId);
+    success({ ...state, present, past: [...state.past, state.present].slice(-HISTORY_LIMIT), future: [], nextId }, objectId);
 
   if (!command) return fail("invalid_command");
   switch (command.type) {

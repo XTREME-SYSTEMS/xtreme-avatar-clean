@@ -131,3 +131,13 @@ test("normalized extremes keep short and long text reachable, including multi-li
   assert.ok(start.travelX > 0 && start.travelY > 0);
   assert.deepEqual(start.lines, ["a very wide line", "next line"]);
 });
+test("canvas approval revisions advance even when edits restore the same visible state", () => {
+  const initial = applyCanvasCommand(createCanvasState(), { type: "add_text", text: "Launch Plan" }).state;
+  const proposed = applyCanvasCommand(initial, { type: "get_state" }).result;
+  const changed = applyCanvasCommand(initial, { type: "update_text", id: "text-1", text: "Changed" }).state;
+  const restored = applyCanvasCommand(changed, { type: "update_text", id: "text-1", text: "Launch Plan" });
+  assert.ok(proposed.ok && restored.result.ok);
+  assert.deepEqual(restored.result.state.objects, proposed.state.objects);
+  assert.ok(restored.result.state.revision > proposed.state.revision);
+  assert.deepEqual(applyCanvasCommand(restored.state, { type: "get_state" }).state, restored.state);
+});

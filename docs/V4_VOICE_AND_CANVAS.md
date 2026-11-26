@@ -26,13 +26,15 @@ Example commands while voice is in progress:
 - “Eden, move text 1 to 150 and 200.”
 - “Eden, read canvas.”
 - “Eden, undo.”
-- “Eden, confirm canvas change” or “Eden, cancel canvas change.”
+- “Eden, cancel canvas change.”
 
 Coordinates range from 0 to 1000. The command path resolves only known app
-routes and typed editor commands. Editor writes require the mounted Create
-Packs screen and explicit confirmation of the captured edit. Changes are
-discarded if a different scene is active or the reviewed scene changed. A read
-reports the current page or a bounded canvas summary.
+routes and typed editor commands. Review the proposed edit and press
+**Confirm canvas change** on the mounted Create Packs screen. The app checks
+the signed-in workspace again before applying the captured edit. An expired,
+cancelled, or superseded proposal cannot change the canvas. Any intervening
+canvas edit also invalidates the proposal. A read reports the current page or a
+bounded canvas summary.
 Other apps, emails, approvals and external execution require purpose-built
 tenant-scoped tools and their own permission and receipt checks.
 

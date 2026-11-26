@@ -1,9 +1,15 @@
+import { createHash } from "node:crypto";
 import { readBoundedJson } from "../core/contracts.ts";
 import { conversationIdPattern, readRenderRoom, renderRoomDurationSeconds } from "./render-contract.ts";
 
 export const echoPalId = "p669b9286c7c";
 export const edenFaceId = "rd3fce670df2";
 const root = "https://tavusapi.com/v2";
+
+function renderConversationName(scopeId: string, requestId: string) {
+  const correlation = createHash("sha256").update(scopeId + ":" + requestId).digest("hex").slice(0, 32);
+  return "Xtreme Avatar render " + correlation;
+}
 
 function object(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : {};
@@ -48,9 +54,9 @@ export function tavusRenderProvider(key: string, fetcher: typeof fetch) {
       return null;
     },
 
-    async create(requestId: string) {
+    async create(scopeId: string, requestId: string) {
       const result = await read(await request("/conversations", "POST", {
-        pal_id: echoPalId, face_id: edenFaceId, conversation_name: "Xtreme Avatar render " + requestId,
+        pal_id: echoPalId, face_id: edenFaceId, conversation_name: renderConversationName(scopeId, requestId),
         require_auth: true, max_participants: 2, dynamic_greeting: false, participant_tags: [],
         properties: {
           max_call_duration: renderRoomDurationSeconds,
@@ -67,6 +73,25 @@ export function tavusRenderProvider(key: string, fetcher: typeof fetch) {
         requestId, conversationId, conversationUrl: result.conversation_url, meetingToken: result.meeting_token,
       }) : null;
       return { conversationId, room };
+    },
+
+    async findActiveRoom(scopeId: string, requestId: string) {
+      const name = renderConversationName(scopeId, requestId);
+      const pageSize = 20;
+      const matches = new Set<string>();
+      for (let page = 1; page <= 2; page++) {
+        const result = await read(await request(`/conversations?status=active&limit=${pageSize}&page=${page}`, "GET"));
+        if (!Array.isArray(result.data) || typeof result.total_count !== "number") throw new Error("Invalid Tavus listing");
+        for (const value of result.data) {
+          const room = object(value);
+          if (room.conversation_name === name && room.status === "active" && room.face_id === edenFaceId &&
+              room.pal_id === echoPalId && typeof room.conversation_id === "string" && conversationIdPattern.test(room.conversation_id)) {
+            matches.add(room.conversation_id);
+          }
+        }
+        if (result.total_count <= page * pageSize) break;
+      }
+      return matches.size === 1 ? matches.values().next().value ?? null : null;
     },
 
     async end(conversationId: string) {

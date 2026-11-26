@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { identityScopeId } from "../src/lib/core/authorization.ts";
 import type { VerifiedIdentity } from "../src/lib/auth/types.ts";
 import { handleTavusRender } from "../src/lib/tavus/render-handler.ts";
@@ -17,6 +17,7 @@ const identity: VerifiedIdentity = {
 const scopeId = identityScopeId(identity);
 const requestId = randomUUID();
 const input = { scopeId, requestId };
+const roomName = "Xtreme Avatar render " + createHash("sha256").update(scopeId + ":" + requestId).digest("hex").slice(0, 32);
 const room = { conversationId: "c123456", conversationUrl: "https://tavus.daily.co/c123456", meetingToken: "fake.private.token" };
 
 function request(method = "POST", payload: object = input, source = origin, signal?: AbortSignal) {
@@ -36,12 +37,16 @@ function fixture() {
   };
   const calls: string[] = [];
   const audit: string[] = [];
-  const state = { disclosure: "off", remaining: true, validRoom: true, lostResponse: false, saved: false, ended: false, cancelled: false };
+  const state = {
+    disclosure: "off", remaining: true, validRoom: true, lostResponse: false,
+    saved: false, ended: false, cancelled: false, writeFailed: false, endFailed: false, listed: false,
+  };
   const store: RenderStore = {
     async check() {},
     async reserve() { const reserved = state.remaining; state.remaining = false; return reserved; },
     async saveRoom(scope, id, conversationId) {
       assert.deepEqual([scope, id, conversationId], [scopeId, requestId, room.conversationId]);
+      if (state.writeFailed) throw new Error("receipt unavailable");
       state.saved = true;
       return { cancelled: state.cancelled };
     },
@@ -56,8 +61,9 @@ function fixture() {
     env, getIdentity: async () => ({ status: "authenticated", identity }), getStore: () => store,
     audit(event, id) { assert.equal(id, requestId); audit.push(event); },
     async fetch(url, init) {
-      const path = new URL(String(url)).pathname;
-      assert.equal(new URL(String(url)).origin, "https://tavusapi.com");
+      const address = new URL(String(url));
+      const path = address.pathname;
+      assert.equal(address.origin, "https://tavusapi.com");
       assert.equal(new Headers(init?.headers).get("x-api-key"), env.TAVUS_API_KEY);
       assert.equal(init?.redirect, "error");
       calls.push(path);
@@ -74,12 +80,23 @@ function fixture() {
       });
       if (path === "/v2/conversations/" + room.conversationId + "/end") {
         assert.equal(init?.method, "POST");
-        return new Response(null, { status: 204 });
+        return new Response(null, { status: state.endFailed ? 502 : 204 });
+      }
+      if (path === "/v2/conversations/" + room.conversationId) {
+        return Response.json({ conversation_id: room.conversationId, status: "active" });
+      }
+      if (path === "/v2/conversations" && init?.method === "GET") {
+        assert.equal(address.search, "?status=active&limit=20&page=1");
+        const match = { conversation_name: roomName, face_id: edenFaceId, pal_id: echoPalId, status: "active" };
+        return Response.json({ data: [
+          { ...match, pal_id: "unrelated-pal", conversation_id: "c999999" },
+          ...(state.listed ? [{ ...match, conversation_id: room.conversationId }] : []),
+        ], total_count: state.listed ? 2 : 1 });
       }
       assert.equal(path, "/v2/conversations");
       assert.equal(init?.method, "POST");
       assert.deepEqual(JSON.parse(String(init?.body)), {
-        pal_id: echoPalId, face_id: edenFaceId, conversation_name: "Xtreme Avatar render " + requestId,
+        pal_id: echoPalId, face_id: edenFaceId, conversation_name: roomName,
         require_auth: true, max_participants: 2, dynamic_greeting: false, participant_tags: [],
         properties: { max_call_duration: 120, participant_absent_timeout: 30, participant_left_timeout: 15,
           enable_recording: false, auto_start_recording: false, enable_closed_captions: false },
@@ -173,7 +190,7 @@ test("a close request before the provider returns prevents room credentials from
   const { deps, state } = fixture();
   const upstream = deps.fetch!;
   deps.fetch = async (url, init) => {
-    if (new URL(String(url)).pathname === "/v2/conversations") {
+    if (new URL(String(url)).pathname === "/v2/conversations" && init?.method === "POST") {
       const closing = await handleTavusRender(request("DELETE"), deps);
       assert.equal(closing.status, 202);
       assert.deepEqual(await closing.json(), { status: "closing" });
@@ -184,6 +201,22 @@ test("a close request before the provider returns prevents room credentials from
   assert.equal(start.status, 502);
   assert.deepEqual(await start.json(), { error: "tavus_render_start_failed" });
   assert.equal(state.ended, true);
+});
+
+test("cleanup recovers an exact workspace room when both its receipt and initial provider close fail", async () => {
+  const { deps, state, calls } = fixture();
+  state.writeFailed = true;
+  state.endFailed = true;
+  assert.equal((await handleTavusRender(request(), deps)).status, 502);
+  assert.equal(state.saved, false);
+  assert.equal(state.ended, false);
+  assert.equal((await handleTavusRender(request("DELETE", { ...input, scopeId: "b".repeat(64) }), deps)).status, 403);
+  assert.equal((await handleTavusRender(request("DELETE"), deps)).status, 202);
+  state.listed = true;
+  state.endFailed = false;
+  assert.deepEqual(await (await handleTavusRender(request("DELETE"), deps)).json(), { status: "ended" });
+  assert.equal(state.ended, true);
+  assert.equal(calls.some(path => path.includes("c999999")), false);
 });
 
 test("an uncertain end is reconciled only by reading the stored room's ended state", async () => {
