@@ -6,6 +6,9 @@ import { PhoneIcon } from "@/components/phone-icon";
 import styles from "./support-screens.module.css";
 
 const menu = [
+  { title: "Communications settings", detail: "Channels, budgets, consented numbers", href: "/settings/communications", screen: "workspace", icon: "imgIconShield" },
+  { title: "Your account", detail: "Sign in and choose your workspace", href: "/account", screen: "home", icon: "imgIconUser" },
+  { title: "Chat with Eden", detail: "Messages and conversation history", href: "/chat", screen: "workspace", icon: "imgIconMail" },
   { title: "Talk to Eden", detail: "Voice conversation", href: "/voice", screen: "home", icon: "imgIconMic1" },
   { title: "Video", detail: "Meet your AI avatar", href: "/video", screen: "home", icon: "imgIconVideo" },
   { title: "Ideas", detail: "Explore your next idea", href: "/invention", screen: "home", icon: "imgIconIdeasRadar" },
@@ -35,17 +38,18 @@ export function MoreScreen() {
 
 export function ConnectionsScreen() {
   const providers = [
-    { name: "Your account", detail: "Sign in to load your own workspace and history." },
-    { name: "Eden", detail: "Chat, voice, and shared conversation history." },
-    { name: "Google Workspace", detail: "Calendar, contacts, email, and files." },
-    { name: "Avatar", detail: "A live video companion for your conversations." },
+    { name: "Your account", detail: "Manage your sign-in and choose your workspace.", status: "Account access", href: "/account", action: "Open your account" },
+    { name: "Eden", detail: "Open chat to check your workspace access and recover your conversation.", status: "Check access", href: "/chat", action: "Open chat" },
+    { name: "Google Workspace", detail: "Email, calendar, contacts, and files need their own permission connection.", status: "Not connected", href: null, action: null },
+    { name: "Avatar", detail: "Live video and shared conversation audio are still being connected.", status: "Setup required", href: "/video", action: "View avatar screen" },
   ];
   return <div className={`${styles.screen} phone-screen`}>
     <Link className={styles.back} href="/settings">← More</Link>
     <header className={styles.heading}><h1>Connections</h1><p>Your accounts, on your terms.</p></header>
-    <p className={styles.notice}>Account setup is still being completed. Your personal data will appear after sign-in is available.</p>
+    <p className={styles.notice}>Start with your account and workspace. Each service opens after its access has been connected.</p>
     <div className={styles.stack}>{providers.map(provider => <section className={styles.panel} key={provider.name}>
-      <div className={styles.titleRow}><h2>{provider.name}</h2><span className={styles.status}>Setup required</span></div><p>{provider.detail}</p>
+      <div className={styles.titleRow}><h2>{provider.name}</h2><span className={styles.status}>{provider.status}</span></div><p>{provider.detail}</p>
+      {provider.href && <p><Link href={provider.href}>{provider.action} →</Link></p>}
     </section>)}</div>
     <Link className={styles.back} href="/workspace">Open Workspace →</Link>
   </div>;

@@ -9,9 +9,11 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test:cleanroom": "node --test tests/cleanroom-policy.test.mjs",
-    "check": "npm run lint && npm run typecheck && npm run test:cleanroom"
+    "test:integration": "node --experimental-strip-types --test tests/*.test.ts tests/auth-boundary.test.mjs",
+    "check": "npm run lint && npm run typecheck && npm run test:cleanroom && npm run test:integration"
   },
   "dependencies": {
+    "@neondatabase/serverless": "1.2.1",
     "next": "16.4.6",
     "react": "19.2.0",
     "react-dom": "19.2.0",
@@ -26,6 +28,6 @@
     "typescript": "^5.8.3"
   },
   "engines": {
-    "node": ">=22.13.0"
+    "node": "24.x"
   }
 }

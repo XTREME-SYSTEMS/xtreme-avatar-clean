@@ -115,7 +115,7 @@ export function VoiceScreen() {
       </button>
       <div className={styles.voiceStates} aria-label="Voice session status"><span>Microphone off</span><span>Not connected</span><span>No audio</span></div>
       <section className={styles.section} aria-labelledby="memory-title"><h2 id="memory-title">Conversation memory</h2><div className={`${styles.metalCard} ${styles.memoryCard}`}><p className={styles.eyebrow}>YOUR CONVERSATION</p><p>No voice conversation yet.</p><small id="voice-help">Voice and shared history need to be connected before a session can begin.</small></div></section>
-      <div className={styles.relatedLinks}><Link href="/video">Open avatar preview</Link><Link href="/connections">Connection settings</Link></div>
+      <div className={styles.relatedLinks}><Link href="/chat">Open text chat</Link><Link href="/video">Open avatar preview</Link><Link href="/connections">Connection settings</Link></div>
     </div>
   );
 }
