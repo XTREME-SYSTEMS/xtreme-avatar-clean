@@ -1,0 +1,29 @@
+name: Eden home layout
+on:
+  pull_request:
+    paths:
+      - 'src/app/eden/**'
+      - 'src/components/chat/**'
+      - 'tests/browser/eden_home.py'
+      - '.github/workflows/eden-home-layout.yml'
+permissions:
+  contents: read
+jobs:
+  responsive-home:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Check preview layouts in Chrome
+        run: |
+          python -m venv "$RUNNER_TEMP/eden-browser"
+          "$RUNNER_TEMP/eden-browser/bin/pip" -q install playwright==1.55.0
+          VERCEL_ENV=preview npm run dev -- --hostname 127.0.0.1 > "$RUNNER_TEMP/eden-next.log" 2>&1 &
+          trap 'kill $! 2>/dev/null || true' EXIT
+          curl -fsS --retry 25 --retry-delay 1 --retry-connrefused http://127.0.0.1:3000/eden > /dev/null
+          "$RUNNER_TEMP/eden-browser/bin/python" tests/browser/eden_home.py
