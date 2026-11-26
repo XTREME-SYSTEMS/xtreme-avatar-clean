@@ -56,6 +56,6 @@ At 2026-11-26 09:03:59 UTC the first live audit returned 9/9 PASS, zero unknown,
 
 The hourly conditional ChatGPT automation is created, but its first unattended run is not proven.
 EVE Foreman V2 is still configured for the template repo, not Xtreme Avatar. End-to-end Foreman intake, repair execution, independent Guardian and production release are not yet certified.
-An authenticated Settings > System Health & Autonomy UI is proposed and must not be called operational until built and tested.
+An authenticated Settings > System Health & Autonomy UI and owner-only API are now implemented in draft PR #6. Live preview behavior and independent release certification are still pending; it is not yet enabled on the production website.
 
 Every later iteration should preserve WHAT WAS FOUND, WHAT WAS HANDLED, WHAT WAS VERIFIED, WHAT REMAINS, immutable SHA, deployment IDs, before/after results, rollback reference, distinct Guardian verdict and evidence link. Suppress routine healthy notifications.
