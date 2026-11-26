@@ -44,6 +44,8 @@ export default function HomePage() {
         <DesignIcon name="imgIconArrow" className={styles.talkArrow} />
       </Link>
 
+      <Link className={styles.chatLink} href="/chat">Prefer to type? Chat with Eden <span aria-hidden="true">→</span></Link>
+
       <section className={styles.quickActions} aria-labelledby="quick-actions-title">
         <h2 id="quick-actions-title">Quick actions</h2>
         <div className={styles.actionGrid}>

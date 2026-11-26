@@ -1,11 +1,56 @@
-# Xtreme Avatar — Clean Room
+# Xtreme Avatar — clean application
 
-New private application repository. This repository starts from a blank GitHub history, not a fork, clone or migration of the legacy application. Current production remains on the previous repository until the owner approves a verified cutover.
+The canonical frontend is `XTREME-SYSTEMS/xtreme-avatar-clean`. It contains the
+Next.js 16 / TypeScript application, the approved brushed-aluminum and gold phone
+design, all eleven restored phone layouts, supporting routes, account access and
+an identity-bound Core chat adapter. It is no longer an empty specification repo.
 
-The new application will use Next.js/TypeScript, the approved Figma design, existing Neon Auth and Neon application data, Eden Core V2 on Railway, OpenAI, Tavus, Twilio, Adobe and Google Workspace. Use existing provider resources and Foreman where verified; no duplicate brain, database or scheduler.
+Eden Core V2 remains the existing brain and memory authority on Railway. Neon
+Managed Better Auth in the existing Avatar project remains the application
+identity service. Core code, legacy app code, database schemas and credentials
+have not been imported into this application.
 
-Four flagship pillars: AI Avatar, [Invention Machine](docs/INVENTION_MACHINE.md), [Lead Finder](docs/LEAD_FINDER.md) and [Auto Social](docs/AUTO_SOCIAL.md). Google Workspace and the other capabilities are shared across them.
+## Development
 
-Read [AGENTS.md](AGENTS.md), [product scope](docs/PRODUCT_SCOPE.md), [integration contract](docs/INTEGRATION_CONTRACT.md), [release gates](docs/RELEASE_GATES.md) and [architecture manifest](architecture/product.json).
+Use Node.js 24 and the committed lockfile:
 
-Current milestone: clean-room foundation specification. No application, live integration, deployment or production cutover is claimed yet.
+```sh
+npm ci
+npm run dev
+npm run check
+npm run build
+```
+
+The visual application builds without service credentials. Copy `.env.example`
+to an ignored local environment file only when configuring an authorized HTTPS
+development/preview origin. Do not put secret values in source or browser-public
+variables. The managed auth adapter uses fixed provider endpoints; there is no
+parallel local auth server or database credential in this first slice.
+
+## What is implemented and what is verified
+
+- The approved phone interface and navigation are implemented, with original asset
+  provenance in `docs/PHONE_SCREEN_PROVENANCE.json`. Mock counts and the Demo data
+  badge were removed in the preceding phone-restoration change.
+- Account and workspace access use fresh provider session and membership checks,
+  host-only HttpOnly cookies, same-origin mutation checks and honest error states.
+- `/api/eden/chat` is a fixed server adapter for Core chat and chronological history.
+  It preserves request identity across retries and validates bounded input/output.
+- Core delegation stays disabled until a specifically approved Neon-to-Core
+  identity mapping and constrained signing-key grant exist. No static owner token
+  is shared among signed-in users.
+- Source tests are separate from live sign-in, Core reply, tenant-denial and recovery
+  acceptance. A passing build does not establish provider connectivity.
+- Workspace data, Tavus playback, Live voice, generation and outbound communications
+  remain unavailable until their real consent, media and receipt paths are verified.
+
+See [auth/chat acceptance](docs/AUTH_AND_CHAT_ACCEPTANCE.md),
+[Core identity requirements](docs/CORE_IDENTITY_BRIDGE_REQUIREMENTS.md), and
+[service readiness](docs/SERVICE_CONNECTION_READINESS.md) for the concrete gates.
+
+## Release
+
+Changes are reviewed on isolated branches. The production domain currently remains
+with the existing application until the exact clean deployment passes
+[release gates](docs/RELEASE_GATES.md), independent review and owner approval.
+Do not treat a Figma preview or a Vercel READY build as a completed live integration.

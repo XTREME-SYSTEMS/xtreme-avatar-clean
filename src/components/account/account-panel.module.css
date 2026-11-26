@@ -1,0 +1,32 @@
+.account { color: #f4f3ef; padding: 4px 0 20px; }
+.heading { margin-bottom: 20px; }
+.eyebrow { color: #d3b674; font-size: 10px; font-weight: 700; letter-spacing: .16em; }
+.heading h1 { margin: 8px 0; font-size: 28px; line-height: 1.2; font-weight: 600; }
+.heading p, .card p { color: #c1c4c9; font-size: 13px; line-height: 1.6; margin: 8px 0 14px; }
+.card { border: 1px solid #665633; border-radius: 17px; padding: 19px 17px; margin-bottom: 14px; background: linear-gradient(140deg, #24282ee8, #101216f2); box-shadow: 0 5px 16px #0003; }
+.card h2 { margin: 0; font-size: 17px; line-height: 1.3; font-weight: 600; overflow-wrap: anywhere; }
+.form { display: grid; gap: 15px; margin-top: 17px; }
+.form label { display: grid; gap: 7px; color: #e0e2e6; font-size: 12px; font-weight: 500; }
+.form input, .form select { box-sizing: border-box; min-width: 0; width: 100%; min-height: 46px; border: 1px solid #6b7079; border-radius: 8px; padding: 11px 12px; background: #0c0f14; color: #fff; font: inherit; font-size: 16px; }
+.form select { white-space: nowrap; text-overflow: ellipsis; }
+.form input:focus-visible, .form select:focus-visible { outline: 2px solid #f5d591; outline-offset: 3px; }
+.primary, .secondary, .signOut { min-height: 44px; border-radius: 9px; padding: 11px 16px; cursor: pointer; font: inherit; font-size: 13px; font-weight: 600; }
+.primary { border: 1px solid #edcf88; background: linear-gradient(180deg, #ebcd8c, #c2a15b); color: #191714; }
+.google { width: 100%; margin-top: 4px; }
+.divider { display: flex; align-items: center; gap: 10px; margin-top: 19px; color: #babfc7; font-size: 11px; }
+.divider::before, .divider::after { content: ""; height: 1px; flex: 1; background: #4b4f56; }
+.secondary { border: 1px solid #a3a8ae; background: linear-gradient(180deg, #444b55, #2d333c); color: #fff; }
+.primary:disabled, .secondary:disabled, .signOut:disabled { cursor: default; opacity: .5; }
+.profile { display: flex; align-items: center; gap: 12px; }
+.profile > div { min-width: 0; }
+.avatar { display: grid; place-items: center; width: 44px; height: 44px; flex: 0 0 44px; border: 1px solid #bb9c58; border-radius: 50%; background: #292820; color: #f5d591; font-size: 20px; }
+.card .email { margin: 4px 0 0; overflow-wrap: anywhere; font-size: 12px; }
+.card .status { margin-bottom: 0; color: #d4e9db; font-size: 12px; text-transform: capitalize; }
+.status > span { display: inline-block; width: 6px; height: 6px; background: #82c99a; border-radius: 50%; margin-right: 7px; vertical-align: middle; }
+.notice, .error { padding: 12px; border-radius: 9px; font-size: 13px; line-height: 1.5; }
+.notice { color: #daf0de; background: #173020; border: 1px solid #466a4c; }
+.error { color: #ffe0da; background: #3a2020; border: 1px solid #a76057; }
+.actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
+.signOut { border: 1px solid #a98464; background: #241e1b; color: #ffe2c5; }
+.homeLink { display: block; margin-top: 22px; color: #e0c689; text-align: center; font-size: 13px; text-decoration: underline; text-underline-offset: 4px; }
+@media (max-width: 360px) { .card { padding: 16px 13px; } .actions { grid-template-columns: 1fr; } }

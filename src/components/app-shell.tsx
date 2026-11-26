@@ -38,7 +38,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className={styles.deviceChrome} aria-hidden="true"><span>9:41</span><span className={styles.camera} /><span>▰ ▰ ▰</span></div>
     <header className="topbar">
       <Link href="/" aria-label="Xtreme Avatar home"><Brand /></Link>
-      <Link className="profile-link" href="/settings" aria-label="Open More and settings"><PhoneIcon screen="home" name="imgIconUser" /></Link>
+      <Link className="profile-link" href="/account" aria-label="Open your account and workspace"><PhoneIcon screen="home" name="imgIconUser" /></Link>
     </header>
     <div className="gold-rule" />
     <main className={`main-content ${styles.content}`} id="app-content" key={pathname}>{children}</main>

@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test:cleanroom": "node --test tests/cleanroom-policy.test.mjs",
-    "check": "npm run lint && npm run typecheck && npm run test:cleanroom"
+    "test:integration": "node --experimental-strip-types --test tests/*.test.ts tests/auth-boundary.test.mjs",
+    "check": "npm run lint && npm run typecheck && npm run test:cleanroom && npm run test:integration"
   },
   "dependencies": {
     "next": "16.4.6",
@@ -26,6 +27,6 @@
     "typescript": "^5.8.3"
   },
   "engines": {
-    "node": ">=22.13.0"
+    "node": "24.x"
   }
 }
