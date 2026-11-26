@@ -1,8 +1,3 @@
-import { ModulePage } from "@/components/module-page";
-import { modules } from "@/lib/product";
+import { ToolScreen } from "@/components/phone-screens/support-screens";
 
-export const metadata = { title: "Lead Finder" };
-
-export default function LeadsPage() {
-  return <ModulePage module={modules.leads} />;
-}
+export default function Page() { return <ToolScreen kind="leads" />; }

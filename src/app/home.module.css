@@ -1,58 +1,11 @@
-/* Scoped to the approved Home screen. Shared routes retain their existing shell. */
-.home { position: static; color: #fafafb; }
-:global(body):has(.home) { background: #090b0e; }
-:global(body):has(.home)::before { opacity: 0; }
-:global(.app-frame):has(.home) {
-  position: relative; isolation: isolate; width: min(478px, calc(100% - 24px));
-  min-height: 1012px; margin: 32px auto; padding: 74px 33px 116px;
-  border: 6px solid transparent; border-radius: 57px; overflow: hidden;
-  background: linear-gradient(90deg, #3c3028, #050506 33.333%, #1a1717 66.667%, #0a0a0b) padding-box,
-    linear-gradient(90deg, #ffdda0, #a96919 20%, #ffedb5 40%, #241810 60%, #d2a055 80%, #ffdc8d) border-box;
-  box-shadow: 0 3px 19px #d99b304d, 0 3px 55px #000c;
-}
-:global(.app-frame):has(.home)::after {
-  position: absolute; content: ""; bottom: 27px; left: 50%; transform: translateX(-50%);
-  width: 130px; height: 4.5px; border-radius: 5px; background: #f7f7f8;
-}
-:global(.app-frame):has(.home) :global(.topbar) { position: relative; z-index: 1; min-height: 59px; }
-:global(.app-frame):has(.home) :global(.brand) { gap: 13.8px; }
-:global(.app-frame):has(.home) :global(.brand-copy strong) { font-size: 25.4px; line-height: 31px; letter-spacing: 0; white-space: nowrap; }
-:global(.app-frame):has(.home) :global(.brand-copy small) { margin-top: 0; font-size: 11.2px; line-height: 14px; letter-spacing: 0; }
-:global(.app-frame):has(.home) :global(.profile-link) { width: 46px; height: 46px; }
-:global(.app-frame):has(.home) :global(.gold-rule) { position: relative; z-index: 1; margin-top: 15px; }
-:global(.app-frame):has(.home) :global(.main-content) { position: static; padding: 16px 0 0; }
-:global(.app-frame):has(.home) :global(.bottom-nav) {
-  position: absolute; inset: auto 13px 34px; height: 84px;
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; padding: 0;
-  border-top: 1.5px solid #d19a26; border-radius: 0;
-  background: linear-gradient(90deg, #171a1e, #08090d 40%, #13161a 80%, #05070a);
-}
-:global(.app-frame):has(.home) :global(.bottom-nav a) {
-  position: relative; min-width: 0; padding: 13px 0 8px; gap: 4px; font-size: 13.877px;
-}
-:global(.app-frame):has(.home) :global(.bottom-nav a.active)::after { position: absolute; bottom: 3px; width: 53px; }
-
-.backdrop {
-  position: absolute; z-index: -1; inset: 13px; overflow: hidden; border-radius: 43px;
-  background: linear-gradient(90deg, #06080b, #15191e 12%, #090c10 24%, #14171b 39%, #0a0d11 54%, #12161b 70%, #090b0e 86%, #050608);
-  pointer-events: none;
-}
-.backdrop img { position: absolute; display: block; max-width: none; }
-.fiber, .curve { left: 0; top: 0; }
-.upperGlow { left: 30px; top: 45px; }
-.middleGlow { left: -177px; top: 320px; }
-.lowerGlow { left: 30px; top: 650px; }
-.deviceChrome { position: absolute; inset: 29px 39px auto 40px; display: flex; justify-content: space-between; align-items: center; height: 24px; font: 600 16.923px/20px "Inter:Semi Bold", Inter, sans-serif; }
-.deviceChrome > span:last-child { font-size: 14.667px; }
-.camera { position: absolute; left: 50%; top: -6px; transform: translateX(-50%); width: 138px; height: 33px; border-radius: 22px; background: #030404; }
-.camera::after { position: absolute; content: ""; right: 13px; top: 13px; width: 8px; height: 8px; border-radius: 50%; background: #071521; }
+.home { position: relative; color: #fafafb; padding-bottom: 8px; }
 .intro h1 { margin: 0; font: 700 32.718px/40px "Inter:Bold", Inter, sans-serif; letter-spacing: -0.025em; }
 .intro p { margin: 2px 0 0; color: #c9c9d1; font-size: 14.779px; line-height: 18px; }
 .talk {
   position: relative; display: block; width: 100%; height: 122px; margin-top: 8px;
   border: 2px solid #ffd56c; border-radius: 21.436px; padding: 0; text-align: left; color: #fafafb; opacity: 1;
   background: linear-gradient(90deg, #595b5c, #a2a3a3 11%, #585c60 28%, #42474b 52%, #85898d 73%, #55585d);
-  box-shadow: 0 3px 9px #0009, 0 3px 19px #ffcc648c; cursor: not-allowed;
+  box-shadow: 0 3px 9px #0009, 0 3px 19px #ffcc648c; cursor: pointer;
 }
 .talk::before { position: absolute; content: ""; top: 2px; left: 4px; right: 4px; height: 1.6px; background: linear-gradient(90deg, #54300b, #fbd982 33.333%, #d19a26 66.667%, #503012); box-shadow: 0 3px 7px #ffdb6bb3; }
 .micDisc { position: absolute; left: 22px; top: 18px; display: grid; place-items: center; width: 81px; height: 81px; border: 2.3px solid #ffdb7a; border-radius: 50%; background: linear-gradient(90deg, #7d5a23, #d8ae5c 12%, #58401d 32%, #42311a 60%, #c5923e 80%, #ffe29b); box-shadow: 0 3px 25px #ffd467a8; }
@@ -67,14 +20,13 @@
 .quickActions { margin-top: 20px; }
 .quickActions h2, .priorities h2 { margin: 0; font: 700 22.564px/27px "Inter:Bold", Inter, sans-serif; letter-spacing: -0.02em; }
 .actionGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 16px; }
-.actionTile { position: relative; display: block; min-width: 0; aspect-ratio: 126.359 / 103.795; padding: 0; color: #fafafb; opacity: 1; border: 1.6px solid #e4be6d; border-radius: 20.308px; background: linear-gradient(90deg, #373b3f, #7d8083 9%, #4b4f54 19%, #9b9da0 36%, #3e4247 50%, #6f7375 69%, #292d31 84%, #73777a); box-shadow: 0 3px 8px #0007, 0 3px 9px #deae5542; }
+.actionTile { position: relative; display: block; width: 100%; min-width: 0; aspect-ratio: 126.359 / 103.795; padding: 0; color: #fafafb; opacity: 1; border: 1.6px solid #e4be6d; border-radius: 20.308px; background: var(--metal-silver); box-shadow: 0 3px 8px #0007, 0 3px 9px #deae5542; }
 .actionTile:disabled { cursor: not-allowed; }
 .actionTile img { position: absolute; top: 16px; left: 50%; transform: translateX(-50%); display: block; max-width: none; }
 .actionTile > span { position: absolute; bottom: 13px; left: 0; right: 0; text-align: center; font: 600 15.231px/18px "Inter:Semi Bold", Inter, sans-serif; }
-.voiceTile { border-color: #ffe7a0; background: linear-gradient(90deg, #7d5a23, #d8ae5c 12%, #58401d 32%, #42311a 60%, #c5923e 80%, #ffe29b); box-shadow: 0 3px 8px #0007, 0 3px 19px #ffbe46a3; }
+.voiceTile { border-color: #ffe7a0; background: var(--metal-gold); box-shadow: 0 3px 8px #0007, 0 3px 19px #ffbe46a3; }
 .priorities { margin-top: 9px; }
 .priorityHeading { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.demo { flex: none; padding: 5px 12px; border-radius: 16px; color: #080809; background: linear-gradient(90deg, #ffe699, #fdbe31); font: 600 11.846px/16px "Inter:Semi Bold", Inter, sans-serif; }
 .priorityList { display: grid; gap: 6.5px; margin-top: 10px; }
 .priorityRow { position: relative; display: block; height: 52px; border: 1.4px solid #d0b57f; border-radius: 13.538px; background: linear-gradient(90deg, #595b5c, #a2a3a3 11%, #585c60 28%, #42474b 52%, #85898d 73%, #55585d); box-shadow: 0 3px 7px #0008, 0 3px 10px #f5d28a30; }
 .priorityIcon { position: absolute; display: block; max-width: none; left: 15px; top: 11px; }
@@ -86,17 +38,6 @@
 .home a:focus-visible { outline: 2px solid #fff2bf; outline-offset: 4px; }
 
 @media (max-width: 520px) {
-  :global(.app-frame):has(.home) { width: calc(100% - 20px); min-height: 950px; margin: 12px auto; padding: 68px 20px 112px; border-width: 4px; border-radius: 42px; }
-  :global(.app-frame):has(.home) :global(.topbar) { min-height: 52px; }
-  :global(.app-frame):has(.home) :global(.brand) { gap: 9px; }
-  :global(.app-frame):has(.home) :global(.brand > img) { width: 47px; height: 47px; }
-  :global(.app-frame):has(.home) :global(.brand-copy strong) { font-size: clamp(17px, 5.1vw, 23px); line-height: 27px; }
-  :global(.app-frame):has(.home) :global(.brand-copy small) { font-size: 9px; line-height: 13px; }
-  :global(.app-frame):has(.home) :global(.profile-link) { width: 38px; height: 38px; }
-  :global(.app-frame):has(.home) :global(.bottom-nav a) { font-size: 12px; }
-  .backdrop { inset: 10px; border-radius: 30px; }
-  .deviceChrome { left: 28px; right: 28px; top: 26px; font-size: 15px; }
-  .camera { width: 117px; height: 30px; }
   .intro h1 { font-size: 29px; line-height: 36px; }
   .intro p { font-size: 12.5px; line-height: 17px; }
   .talk { height: 112px; }
@@ -117,14 +58,16 @@
   .priorityIcon { left: 12px; }
   .priorityCopy strong { font-size: 13px; }
   .priorityCopy > span { font-size: 10.7px; }
-  .demo { padding-inline: 9px; font-size: 10px; }
 }
 @media (max-width: 360px) {
-  :global(.app-frame):has(.home) { padding-inline: 14px; }
-  :global(.app-frame):has(.home) :global(.brand) { gap: 6px; }
-  :global(.app-frame):has(.home) :global(.brand-copy strong) { font-size: 16px; }
   .talkCopy strong { font-size: 18px; }
   .talkCopy { left: 94px; }
   .talkArrow { display: none; }
   .priorities h2 { font-size: 18px; }
 }
+
+
+.actionTile, .talk { transition: box-shadow 160ms ease, filter 160ms ease; }
+.actionTile:hover, .talk:hover { filter: brightness(1.07); }
+.actionTile:active { filter: brightness(.95); }
+@media (prefers-reduced-motion: reduce) { .actionTile, .talk { transition: none; } }

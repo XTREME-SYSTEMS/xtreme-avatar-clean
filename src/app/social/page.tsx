@@ -1,8 +1,3 @@
-import { ModulePage } from "@/components/module-page";
-import { modules } from "@/lib/product";
+import { ToolScreen } from "@/components/phone-screens/support-screens";
 
-export const metadata = { title: "Auto Social" };
-
-export default function SocialPage() {
-  return <ModulePage module={modules.social} />;
-}
+export default function Page() { return <ToolScreen kind="social" />; }
