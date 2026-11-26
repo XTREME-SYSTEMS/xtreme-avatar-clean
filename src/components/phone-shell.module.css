@@ -1,64 +1,94 @@
 :global(.app-frame).shell {
-  --metal-silver: repeating-linear-gradient(180deg, #ffffff05 0px, #ffffff05 .7px, #00000005 .7px, #00000005 1.5px, transparent 1.5px, transparent 3px), linear-gradient(180deg, #7c8488 0%, #90979a 15%, #656d72 44%, #596166 72%, #444c51 100%);
-  --metal-gold: repeating-linear-gradient(180deg, #ffffff05 0px, #ffffff05 .7px, #00000005 .7px, #00000005 1.5px, transparent 1.5px, transparent 3px), linear-gradient(180deg, #b18b48 0%, #c4a05c 15%, #98763b 44%, #896830 72%, #705324 100%);
-  position: relative; isolation: isolate; width: min(478px, calc(100% - 24px)); height: 1012px; min-height: 0;
-  margin: 24px auto; padding: 74px 33px 112px; border: 6px solid transparent; border-radius: 57px; overflow: hidden;
-  background: linear-gradient(90deg, #3c3028, #050506 33.333%, #1a1717 66.667%, #0a0a0b) padding-box,
-    linear-gradient(90deg, #ffdda0, #a96919 20%, #ffedb5 40%, #241810 60%, #d2a055 80%, #ffdc8d) border-box;
-  box-shadow: 0 3px 19px #d99b304d, 0 3px 55px #000c;
+  --metal-silver: linear-gradient(168deg, #747b82, #474d54 50%, #32373d);
+  --metal-gold: linear-gradient(168deg, #bb9459, #8c6938 52%, #654a28);
+  --edge: clamp(1rem, 4vw, 3.25rem);
+  box-sizing: border-box;
+  display: grid;
+  grid-template: "header" auto "content" 1fr "nav" auto / minmax(0, 1fr);
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0;
+  padding: 0;
+  background: radial-gradient(ellipse at 78% 0, #24262c 0%, #14161a 36%, #0c0d10 78%);
 }
-:global(body):has(.shell) { background: #090b0e; }
-:global(body):has(.shell)::before { opacity: 0; }
-.shell::after { position: absolute; content: ""; bottom: 22px; left: 50%; transform: translateX(-50%); width: 130px; height: 4.5px; border-radius: 5px; background: #f7f7f8; }
-.shell :global(.topbar) { position: relative; z-index: 1; min-height: 59px; gap: 10px; }
-.shell :global(.brand) { gap: 13.8px; }
-.shell :global(.brand-copy strong) { font-size: 25.4px; line-height: 31px; letter-spacing: 0; white-space: nowrap; }
-.shell :global(.brand-copy small) { margin-top: 0; font-size: 11.2px; line-height: 14px; letter-spacing: 0; }
-.shell :global(.profile-link) { width: 46px; height: 46px; }
-.shell :global(.profile-link img) { display: block; }
-.shell :global(.gold-rule) { position: relative; z-index: 1; margin-top: 15px; }
-.shell .content { position: relative; height: calc(100% - 76px); padding: 16px 0 10px; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; overscroll-behavior: contain; }
-.content::-webkit-scrollbar { display: none; }
-.shell :global(.bottom-nav) { position: absolute; inset: auto 13px 34px; height: 84px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; padding: 0; border-top: 1.5px solid #d19a26; border-radius: 0; background: linear-gradient(90deg, #171a1e, #08090d 40%, #13161a 80%, #05070a); }
-.shell :global(.bottom-nav a) { position: relative; min-width: 0; padding: 13px 0 8px; gap: 4px; font-size: 13.877px; }
-.shell :global(.bottom-nav img) { width: auto; height: auto; display: block; }
-.shell :global(.bottom-nav a.active)::after { position: absolute; bottom: 3px; width: 53px; }
-.shell a:focus-visible, .shell button:focus-visible { outline: 2px solid #fff2bf; outline-offset: 3px; }
-.backdrop { position: absolute; z-index: -1; inset: 13px; overflow: hidden; border-radius: 43px; background: linear-gradient(90deg, #06080b, #15191e 12%, #090c10 24%, #14171b 39%, #0a0d11 54%, #12161b 70%, #090b0e 86%, #050608); pointer-events: none; }
-.backdrop img { position: absolute; display: block; max-width: none; }
-.fiber, .curve { left: 0; top: 0; }
-.upperGlow { left: 30px; top: 45px; }
-.middleGlow { left: -177px; top: 320px; }
-.lowerGlow { left: 30px; top: 650px; }
-.deviceChrome { position: absolute; inset: 29px 39px auto 40px; display: flex; justify-content: space-between; align-items: center; height: 24px; font: 600 16.923px/20px "Inter:Semi Bold", Inter, sans-serif; }
-.deviceChrome > span:last-child { font-size: 14.667px; }
-.camera { position: absolute; left: 50%; top: -6px; transform: translateX(-50%); width: 138px; height: 33px; border-radius: 22px; background: #030404; }
-.camera::after { position: absolute; content: ""; right: 13px; top: 13px; width: 8px; height: 8px; border-radius: 50%; background: #071521; }
-:global(.app-frame).shell.focus { padding: 65px 24px 40px; }
-.focus :global(.topbar) { min-height: 42px; }
-.focus :global(.brand img) { width: 42px; height: 42px; }
-.focus :global(.brand-copy strong) { font-size: 21px; line-height: 25px; }
-.focus :global(.brand-copy small) { font-size: 9px; line-height: 12px; }
-.focus :global(.profile-link) { width: 36px; height: 36px; }
-.focus :global(.gold-rule) { margin-top: 10px; }
-.focus .content { height: calc(100% - 54px); padding-top: 12px; }
-@media (max-width: 520px) {
-  :global(.app-frame).shell { width: calc(100% - 20px); height: 950px; min-height: 0; margin: 12px auto; padding: 68px 20px 112px; border-width: 4px; border-radius: 42px; }
-  .shell :global(.topbar) { min-height: 52px; gap: 8px; }
-  .shell :global(.brand) { gap: 9px; }
-  .shell :global(.brand > img) { width: 47px; height: 47px; }
-  .shell :global(.brand-copy strong) { font-size: clamp(17px, 5.1vw, 23px); line-height: 27px; }
-  .shell :global(.brand-copy small) { font-size: 9px; line-height: 13px; }
-  .shell :global(.profile-link) { width: 38px; height: 38px; }
-  .shell .content { height: calc(100% - 69px); }
-  .shell :global(.bottom-nav a) { font-size: 12px; }
-  .backdrop { inset: 10px; border-radius: 30px; }
-  .deviceChrome { left: 28px; right: 28px; top: 26px; font-size: 15px; }
-  .camera { width: 117px; height: 30px; }
-  :global(.app-frame).shell.focus { padding: 65px 18px 40px; }
-  .focus :global(.topbar) { min-height: 42px; }
-  .focus :global(.brand > img) { width: 38px; height: 38px; }
-  .focus :global(.brand-copy strong) { font-size: 18px; line-height: 22px; }
-  .focus .content { height: calc(100% - 54px); }
+.shell :global(.topbar) {
+  grid-area: header;
+  box-sizing: border-box;
+  min-height: 64px;
+  padding: calc(.45rem + env(safe-area-inset-top, 0px))
+    max(var(--edge), env(safe-area-inset-right, 0px)) .45rem
+    max(var(--edge), env(safe-area-inset-left, 0px));
+  gap: .75rem;
+  border-bottom: 1px solid #ffffff24;
 }
-@media (max-width: 360px) { :global(.app-frame).shell { padding-inline: 14px; } .shell :global(.brand) { gap: 6px; } .shell :global(.brand-copy strong) { font-size: 16px; } }
+.shell :global(.brand) { gap: .55rem; }
+.shell :global(.brand > img) { width: 42px; height: 42px; }
+.shell :global(.brand-copy strong) { font-size: clamp(.94rem, 4vw, 1.22rem); line-height: 1.2; }
+.shell :global(.profile-link) { width: 44px; height: 44px; box-shadow: none; }
+.shell :global(.profile-link img) { display: block; max-width: 24px; max-height: 24px; }
+
+.shell .content {
+  grid-area: content;
+  box-sizing: border-box;
+  min-width: 0;
+  width: 100%;
+  max-width: 76rem;
+  justify-self: center;
+  padding: clamp(1rem, 4vw, 2.75rem) max(var(--edge), env(safe-area-inset-right, 0px))
+    1.5rem max(var(--edge), env(safe-area-inset-left, 0px));
+}
+.shell :global(.bottom-nav) {
+  grid-area: nav;
+  position: sticky;
+  inset: auto;
+  bottom: 0;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  padding: .3rem max(.35rem, env(safe-area-inset-right, 0px))
+    calc(.3rem + env(safe-area-inset-bottom, 0px)) max(.35rem, env(safe-area-inset-left, 0px));
+  border-top: 1px solid #ffffff24;
+  background: #111316;
+}
+.shell :global(.bottom-nav a) {
+  min-width: 0;
+  min-height: 44px;
+  padding: .2rem;
+  gap: .15rem;
+  border-radius: .5rem;
+}
+.shell :global(.bottom-nav img) { width: 24px; height: 24px; object-fit: contain; }
+.shell :global(.bottom-nav a[aria-current="page"]) { background: #28272a; }
+.shell :global(.bottom-nav a.active)::after { display: none; }
+.shell a:focus-visible, .shell button:focus-visible { outline: 2px solid #fff0bb; outline-offset: 2px; }
+.skip { position: absolute; left: .75rem; top: .75rem; z-index: 20; transform: translateY(-150%); padding: .65rem; background: #f5f5f6; color: #111316; }
+.skip:focus { transform: none; }
+:global(.app-frame).shell.focus { grid-template-areas: "header" "content"; grid-template-rows: auto 1fr; }
+.focus .content { padding-bottom: max(1.5rem, env(safe-area-inset-bottom, 0px)); }
+
+@media (min-width: 860px) {
+  :global(.app-frame).shell {
+    grid-template: "header header" auto "nav content" 1fr / 12rem minmax(0, 1fr);
+  }
+  .shell :global(.bottom-nav) {
+    position: relative;
+    align-self: stretch;
+    align-content: start;
+    grid-template-columns: minmax(0, 1fr);
+    gap: .35rem;
+    padding: 1.4rem .75rem;
+    border-top: 0;
+    border-right: 1px solid #ffffff24;
+  }
+  .shell :global(.bottom-nav a) {
+    grid-template-columns: 24px minmax(0, 1fr);
+    gap: .7rem;
+    justify-items: start;
+    align-items: center;
+    padding: .55rem .65rem;
+    font-size: .94rem;
+  }
+  :global(.app-frame).shell.focus { grid-template-columns: minmax(0, 1fr); }
+}
