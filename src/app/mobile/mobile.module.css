@@ -6,7 +6,7 @@
   min-height: 100svh; color: var(--ivory); background: #0d0e0e; font: 400 16px/1.45 "Avatar Inter", system-ui, sans-serif;
 }
 .shell {
-  width: min(100%, 32rem); position: relative; isolation: isolate; margin-inline: auto;
+  width: 100%; position: relative; isolation: isolate; margin-inline: auto;
   min-height: 100svh; min-height: 100dvh; display: flex; flex-direction: column;
   padding: env(safe-area-inset-top) max(24px, env(safe-area-inset-right)) 0 max(24px, env(safe-area-inset-left));
   background: #101112;
@@ -58,7 +58,23 @@
 .info svg { color: var(--gold); }
 .info h2 { margin: 9px 0 7px; font-size: 18px; }
 .info p { margin: 0; color: var(--muted); }
-@media (min-width: 600px) { .shell { border-inline: 1px solid #272724; padding-inline: 36px; } }
 @media (max-height: 690px) { .brandBar { min-height: 62px; } .art { min-height: 125px; } .art img { height: 135px; } .intro { padding-top: 4px; } .home { padding-bottom: 17px; } .composer { margin-top: 4px; } }
 
 .install { margin-left: auto; min-height: 44px; border: 0; background: transparent; color: var(--gold); font: 550 13px "Avatar Inter", system-ui, sans-serif; cursor: pointer; }
+
+
+@media (min-width: 860px) {
+  .shell {
+    display: grid;
+    grid-template: "brand brand" auto "tabs main" 1fr / 12rem minmax(0,1fr);
+    gap: 0 clamp(1rem,4vw,3rem);
+    padding-inline: clamp(1.25rem,4vw,3.5rem);
+  }
+  .brandBar { grid-area: brand; border-bottom: 1px solid var(--edge); }
+  .main { grid-area: main; width: 100%; max-width: 72rem; }
+  .tabs { grid-area: tabs; position: relative; align-self: start; align-items: stretch; flex-direction: column; padding-block: 1rem; border-top: 0; }
+  .tabs a { flex-direction: row; justify-content: flex-start; gap: .75rem; font-size: .9rem; }
+  .actions { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .composer { grid-column: 1 / -1; }
+  .art { min-height: 180px; }
+}
