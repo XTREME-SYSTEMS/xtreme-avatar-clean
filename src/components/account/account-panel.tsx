@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import type { AccountSession } from "@/lib/auth/types";
 import { googleSignInErrorMessage } from "@/lib/auth/google-errors";
 import { accountFocusAction, SIGN_UP_UNCERTAIN_MESSAGE } from "@/lib/auth/account-focus";
 import { GoogleLinkPanel } from "./google-link-panel";
+import { dashboardDestination } from "@/lib/auth/account-navigation";
 import styles from "./account-panel.module.css";
 
 const SESSION_CHANGE_KEY = "avatar.auth.revision";
@@ -53,6 +55,7 @@ function actionError(code: unknown, fallback: string): string {
 }
 
 export function AccountPanel({ configured, googleError = false, googleReturn = false, googleIssue, googleLinkReturn = false, googleLinkIssue }: { configured: boolean; googleError?: boolean; googleReturn?: boolean; googleIssue?: string; googleLinkReturn?: boolean; googleLinkIssue?: string }) {
+  const router = useRouter();
   const [session, updateSession] = useState<ScreenState>(configured ? { status: "loading" } : { status: "unavailable", code: "AUTH_NOT_CONFIGURED" });
   const sessionRef = useRef<ScreenState>(session);
   const setSession = useCallback((next: ScreenState) => { sessionRef.current = next; updateSession(next); }, []);
@@ -86,6 +89,7 @@ export function AccountPanel({ configured, googleError = false, googleReturn = f
       }
       setSession(result);
       setOrganizationId(result.organization?.id ?? "");
+      return result;
     } catch {
       if (current === generation.current && !controller.signal.aborted) {
         if (preserveAnonymousDraft && sessionRef.current.status === "anonymous") {
@@ -104,7 +108,9 @@ export function AccountPanel({ configured, googleError = false, googleReturn = f
     if (googleReturn || googleLinkReturn) notifySessionChange(tabId.current);
     let mounted = true;
     // Cancel the initial fetch if React abandons this mount before its microtask.
-    queueMicrotask(() => { if (mounted && configured) void refreshSession(); });
+    queueMicrotask(() => { if (mounted && configured) void refreshSession().then((next) => {
+      if (mounted && googleReturn && dashboardDestination(next)) router.replace("/dashboard");
+    }); });
     const invalidateAccount = (interruptedSignup = false) => {
       ++authEpoch.current;
       actionController.current?.abort();
@@ -136,7 +142,7 @@ export function AccountPanel({ configured, googleError = false, googleReturn = f
       window.removeEventListener("storage", onStorage);
       channel?.close();
     };
-  }, [configured, googleError, googleReturn, googleLinkReturn, refreshSession, setPending, setSession]);
+  }, [configured, googleError, googleReturn, googleLinkReturn, refreshSession, router, setPending, setSession]);
 
   function startAction(kind: NonNullable<typeof pending>) {
     ++generation.current;
@@ -169,7 +175,8 @@ export function AccountPanel({ configured, googleError = false, googleReturn = f
       form.reset();
       setEmail("");
       notifySessionChange(tabId.current);
-      await refreshSession();
+      const verified = await refreshSession();
+      if (epoch === authEpoch.current && !controller.signal.aborted && dashboardDestination(verified)) router.replace("/dashboard");
     } catch { if (epoch === authEpoch.current) setError("We could not reach sign-in. Check your connection and try again."); }
     finally { if (epoch === authEpoch.current) setPending(null); }
   }
@@ -209,7 +216,8 @@ export function AccountPanel({ configured, googleError = false, googleReturn = f
         setNotice("You are not signed in yet. Try signing in with this email and password, or follow any verification email you receive.");
       }
       notifySessionChange(tabId.current);
-      await refreshSession();
+      const verified = await refreshSession();
+      if (epoch === authEpoch.current && result.outcome === "signed_in" && dashboardDestination(verified)) router.replace("/dashboard");
     } catch {
       if (epoch === authEpoch.current && !controller.signal.aborted) {
         form.reset(); setAuthMode("sign-in"); setEmail(submittedEmail);
@@ -281,6 +289,7 @@ export function AccountPanel({ configured, googleError = false, googleReturn = f
       setOrganizationId(result.organization?.id ?? "");
       setNotice("Your workspace is ready.");
       notifySessionChange(tabId.current);
+      if (dashboardDestination(result)) router.replace("/dashboard");
     } catch { if (epoch === authEpoch.current) setError("We could not switch workspaces. Check your connection and try again."); }
     finally { if (epoch === authEpoch.current) setPending(null); }
   }
@@ -313,6 +322,7 @@ export function AccountPanel({ configured, googleError = false, googleReturn = f
       setSession(result);
       setOrganizationId(result.organization?.id ?? "");
       setNotice(result.workspaceCreation === "created" ? "Your workspace has been created." : "Your existing workspace is open.");
+      if (dashboardDestination(result)) router.replace("/dashboard");
     } catch {
       if (epoch === authEpoch.current) {
         notifySessionChange(tabId.current);
@@ -363,6 +373,7 @@ export function AccountPanel({ configured, googleError = false, googleReturn = f
 
     {user && <section className={styles.card}>
       <div className={styles.profile}><span className={styles.avatar} aria-hidden="true">{user.name.trim().slice(0, 1).toUpperCase() || "A"}</span><div><h2>{user.name}</h2><p className={styles.email}>{user.email}</p></div></div>
+      {session.status === "authenticated" && <p><Link className={styles.homeLink} href="/dashboard">Open your dashboard</Link></p>}
       {session.status === "authenticated" && <p className={styles.status}><span aria-hidden="true" />Signed in · {currentOrganization?.role}</p>}
       {session.status === "membership_required" && <p>{organizations?.length === 0 && !session.organizationListUnavailable ? "Create your first workspace or join an existing one to continue." : "Choose a workspace to continue. Signing in does not automatically grant workspace access."}</p>}
       {session.status === "access_denied" && <p>This account cannot access the selected workspace. Refresh your account or contact the workspace owner.</p>}

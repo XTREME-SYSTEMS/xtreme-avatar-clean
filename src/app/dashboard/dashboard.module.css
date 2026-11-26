@@ -1,0 +1,13 @@
+.bar { display:flex; justify-content:space-between; align-items:center; gap:12px; border:1px solid #9e8858; border-radius:14px; background:linear-gradient(130deg,#20262d,#101316); padding:12px 14px; margin-bottom:14px; color:#f6f2e9; }
+.identity { display:grid; gap:2px; min-width:0; }
+.eyebrow { font-size:10px; letter-spacing:.13em; color:#e1bb6c; font-weight:700; }
+.identity strong { font-size:15px; overflow-wrap:anywhere; }
+.identity small { font-size:11px; color:#c9cbd0; }
+.account { flex:none; padding:8px 9px; border:1px solid #b6995e; border-radius:9px; color:#f4da9d; text-decoration:none; font-size:11px; font-weight:600; }
+.links { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin:18px 0 10px; }
+.links a { border:1px solid #8a7851; border-radius:11px; padding:12px 8px; text-align:center; font-size:12px; color:#ffe1a2; background:#292e33; text-decoration:none; }
+.notice { display:grid; gap:10px; color:#f4f2ee; padding:18px; border:1px solid #9e8858; border-radius:14px; background:#212429; }
+.notice h1 { font-size:21px; margin:0; }
+.notice p { font-size:13px; color:#d0d1d4; }
+.notice a { color:#ffe1a2; }
+@media(max-width:360px) { .bar { padding:10px; } .account { max-width:95px; text-align:center; } }
