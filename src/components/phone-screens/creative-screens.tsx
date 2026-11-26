@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useReducer, useState } from "react";
+import { useState } from "react";
 import { PhoneIcon } from "@/components/phone-icon";
+import { TavusAvatarRender } from "@/components/tavus-avatar-render";
+import { VoiceOperatorPanel } from "@/components/voice-operator";
 import styles from "./creative-screens.module.css";
 
 function BackLink({ href = "/", children = "Home" }: { href?: string; children?: string }) {
@@ -74,33 +76,16 @@ export function OpportunityScreen() {
   );
 }
 
-const waveformHeights = [10, 18, 25, 12, 30, 37, 22, 15, 29, 36, 23, 12, 31, 39, 19, 12, 25, 32, 16, 10, 7];
-
 export function VideoScreen() {
-  const [captions, setCaptions] = useState(false);
-  const [silverTheme, setSilverTheme] = useState(false);
   return (
     <div className={`${styles.screen} ${styles.videoScreen} phone-screen`} data-design-node="42:297">
       <BackLink />
       <h1 className={styles.visuallyHidden}>Video with Eden</h1>
-      <section className={`${styles.videoStage} ${silverTheme ? styles.silverTheme : ""}`} aria-label="Avatar preview">
-        <PhoneIcon screen="video" name="imgAvatarContentImagePhotoOnlyDemoNotVideo" alt="Eden avatar portrait preview" className={styles.portrait} />
+      <TavusAvatarRender mediaClassName={styles.videoStage} portrait={<>
+        <PhoneIcon screen="video" name="imgAvatarContentImagePhotoOnlyDemoNotVideo" alt="Eden avatar portrait" className={styles.portrait} />
         <div className={styles.videoShade} />
-        <div className={styles.videoTop}><span className={styles.glassPill}>● Preview · AI Avatar</span><button type="button" className={styles.glassPill} onClick={() => setSilverTheme(value => !value)} aria-pressed={silverTheme}><PhoneIcon screen="video" name="imgVideoIconTheme" />{silverTheme ? "Silver" : "Skin / Theme"}</button></div>
-        <div className={styles.videoBottom}>
-          {captions && <p className={styles.captionPlaceholder} role="status">Captions will appear during an active session.</p>}
-          <p className={styles.mediaStatus}>Static portrait · Video setup required</p>
-          <button type="button" className={styles.startVideo} disabled>Connect video to begin</button>
-          <div className={styles.waveform} aria-hidden="true">{waveformHeights.map((height, index) => <i key={index} style={{ height }} />)}</div>
-          <div className={styles.videoControls} aria-label="Video controls">
-            <button type="button" disabled title="A connected voice session is required"><PhoneIcon screen="video" name="imgVideoIconMic" /><span>Mute</span></button>
-            <button type="button" disabled title="A connected video session is required"><PhoneIcon screen="video" name="imgVideoIconCamera" /><span>Camera</span></button>
-            <button type="button" onClick={() => setCaptions(value => !value)} aria-pressed={captions}><PhoneIcon screen="video" name="imgVideoIconCaptions" /><span>Captions</span></button>
-            <button type="button" disabled title="There is no active response to interrupt"><PhoneIcon screen="video" name="imgVideoIconInterrupt" /><span>Interrupt</span></button>
-            <Link className={styles.endVideo} href="/" aria-label="Close avatar preview"><PhoneIcon screen="video" name="imgVideoIconEnd" /><span>Close</span></Link>
-          </div>
-        </div>
-      </section>
+        <div className={styles.videoTop}><span className={styles.glassPill}>Eden Skye · AI Avatar</span></div>
+      </>} />
     </div>
   );
 }
@@ -109,47 +94,11 @@ export function VoiceScreen() {
   return (
     <div className={`${styles.screen} phone-screen`} data-design-node="42:375">
       <header className={styles.heading}><h1>Talk to Eden</h1><p>A natural conversation, with your work close by.</p></header>
-      <button type="button" className={`${styles.metalCard} ${styles.voiceField}`} disabled aria-describedby="voice-help">
+      <div className={`${styles.metalCard} ${styles.voiceField}`}>
         <span className={styles.voiceVisual} aria-hidden="true"><PhoneIcon screen="voice" name="imgVoiceOuterGoldHalo" className={styles.orbLayer} /><PhoneIcon screen="voice" name="imgVoiceInnerRing" className={styles.orbLayer} /><PhoneIcon screen="voice" name="imgIconMic" className={styles.orbLayer} /></span>
-        <strong>Voice setup required</strong>
-      </button>
-      <div className={styles.voiceStates} aria-label="Voice session status"><span>Microphone off</span><span>Not connected</span><span>No audio</span></div>
-      <section className={styles.section} aria-labelledby="memory-title"><h2 id="memory-title">Conversation memory</h2><div className={`${styles.metalCard} ${styles.memoryCard}`}><p className={styles.eyebrow}>YOUR CONVERSATION</p><p>No voice conversation yet.</p><small id="voice-help">Voice and shared history need to be connected before a session can begin.</small></div></section>
+        <VoiceOperatorPanel />
+      </div>
       <div className={styles.relatedLinks}><Link href="/chat">Open text chat</Link><Link href="/video">Open avatar preview</Link><Link href="/connections">Connection settings</Link></div>
-    </div>
-  );
-}
-
-type PromptHistory = { past: string[]; present: string; future: string[] };
-type PromptAction = { type: "edit"; value: string } | { type: "undo" } | { type: "redo" };
-function promptReducer(state: PromptHistory, action: PromptAction): PromptHistory {
-  if (action.type === "edit") return action.value === state.present ? state : { past: [...state.past, state.present].slice(-50), present: action.value, future: [] };
-  if (action.type === "undo" && state.past.length) return { past: state.past.slice(0, -1), present: state.past[state.past.length - 1], future: [state.present, ...state.future] };
-  if (action.type === "redo" && state.future.length) return { past: [...state.past, state.present], present: state.future[0], future: state.future.slice(1) };
-  return state;
-}
-
-const studios = [
-  { name: "Apps", icon: "imgIconBox", placeholder: "Describe the app you want to create…" },
-  { name: "Workflow", icon: "imgIconGear", placeholder: "Describe the workflow you want to create…" },
-  { name: "AI agents", icon: "imgIconSpark", placeholder: "Describe the agent you want to create…" },
-  { name: "Design", icon: "imgIconImage", placeholder: "Describe what to create or change…" },
-] as const;
-
-export function CreateScreen() {
-  const [studio, setStudio] = useState<(typeof studios)[number]>(studios[3]);
-  const [prompt, dispatch] = useReducer(promptReducer, { past: [], present: "", future: [] });
-  return (
-    <div className={`${styles.screen} ${styles.createScreen} phone-screen`} data-design-node="42:931">
-      <div className={styles.createHeading}><BackLink /><h1>Create with Eden</h1><button type="button" className={styles.micButton} disabled aria-label="Voice input requires setup"><PhoneIcon screen="create" name="imgMicrophone" /></button></div>
-      <section className={styles.canvas} aria-label="Canvas preview">
-        <PhoneIcon screen="create" name="imgImageCanvasDesertStudy" alt="Desert study: a sculpted arch and curved stairway framing the setting sun" className={styles.canvasImage} />
-        <div className={styles.canvasToolbar}><strong>Desert study</strong><button type="button" disabled={!prompt.past.length} onClick={() => dispatch({ type: "undo" })} aria-label="Undo prompt edit">Undo</button><button type="button" disabled={!prompt.future.length} onClick={() => dispatch({ type: "redo" })} aria-label="Redo prompt edit">Redo</button><button type="button" disabled title="Connect storage before saving a canvas">Save</button></div>
-        <div className={styles.canvasNotice}><span>CANVAS PREVIEW</span><p>Describe your idea below.</p></div>
-      </section>
-      <section className={styles.studioSection} aria-label="Generation studios"><p>Generation studios · choose a category</p><div className={styles.studioGrid}>{studios.map(item => <button type="button" key={item.name} aria-pressed={studio.name === item.name} onClick={() => setStudio(item)}><PhoneIcon screen="create" name={item.icon} /><span>{item.name}</span></button>)}</div></section>
-      <div className={styles.composer}><label className={styles.visuallyHidden} htmlFor="canvas-prompt">Describe what to create or change</label><textarea id="canvas-prompt" value={prompt.present} onChange={event => dispatch({ type: "edit", value: event.target.value })} placeholder={studio.placeholder} rows={2} maxLength={2000} aria-describedby="canvas-setup" /><div className={styles.composerFooter}><button type="button" disabled title="Image uploads need to be connected">+ Add image</button><span>Eden · {studio.name}</span><button type="button" className={styles.sendPrompt} disabled aria-label="Generate requires setup">↑</button></div></div>
-      <p className={styles.footnote} id="canvas-setup">Draft text is local to this page. Image generation and saving need setup.</p>
     </div>
   );
 }

@@ -3,7 +3,7 @@
 .eyebrow { color: #d3b674; font-size: 10px; font-weight: 700; letter-spacing: .16em; }
 .heading h1 { margin: 8px 0; font-size: 28px; line-height: 1.2; font-weight: 600; }
 .heading p, .card p { color: #c1c4c9; font-size: 13px; line-height: 1.6; margin: 8px 0 14px; }
-.card { border: 1px solid #665633; border-radius: 17px; padding: 19px 17px; margin-bottom: 14px; background: linear-gradient(140deg, #24282ee8, #101216f2); box-shadow: 0 5px 16px #0003; }
+.card { border: 1px solid var(--card-border-color); border-radius: 17px; padding: 19px 17px; margin-bottom: 14px; background: var(--card-surface); box-shadow: var(--card-shadow); }
 .card h2 { margin: 0; font-size: 17px; line-height: 1.3; font-weight: 600; overflow-wrap: anywhere; }
 .form { display: grid; gap: 15px; margin-top: 17px; }
 .authModes { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; margin-bottom: 20px; border: 1px solid #68614f; border-radius: 11px; background: #111419; }

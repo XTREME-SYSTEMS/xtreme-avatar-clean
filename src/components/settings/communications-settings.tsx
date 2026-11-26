@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { EMPTY_PREFERENCES, type ConsentChannel, type ConsentedNumber, type MessagingPreferences } from "@/lib/communications/validation";
+import { useState, type FormEvent } from "react";
+import { type ConsentChannel, type ConsentedNumber, type MessagingPreferences } from "@/lib/communications/validation";
+import { staleCommunicationsAccess } from "@/lib/communications/send-policy";
+import { CommunicationsBoundary, type WorkspaceView } from "@/components/communications/workspace-boundary";
 import styles from "./communications-settings.module.css";
 
-type Load = { ok: boolean; code?: string; preferences?: MessagingPreferences; contacts?: ConsentedNumber[] };
+type Load = { scopeId?: string; ok: boolean; code?: string; preferences?: MessagingPreferences; contacts?: ConsentedNumber[] };
 type Draft = {
   displayName: string; phoneE164: string; purpose: "account" | "transactional" | "marketing" | "voice";
   channels: ConsentChannel[]; evidenceNote: string; revision: number;
@@ -13,33 +15,53 @@ type Draft = {
 const blank: Draft = { displayName: "", phoneE164: "", purpose: "transactional", channels: ["sms"], evidenceNote: "", revision: 0 };
 const labels: Record<ConsentChannel,string> = { sms: "SMS", mms: "MMS", whatsapp: "WhatsApp", voice: "Voice" };
 
-async function request(action: string, data: unknown): Promise<{ ok: boolean; code?: string }> {
+async function request(view: WorkspaceView, action: string, data: unknown): Promise<{ ok: boolean; code?: string }> {
+  if (!view.current()) return { ok: false, code: "WORKSPACE_CHANGED" };
   const response = await fetch("/api/settings/communications", {
     method: "POST", credentials: "same-origin", cache: "no-store",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", "X-Avatar-Scope": view.scopeId },
     body: JSON.stringify({ action, data }),
   });
   const result = await response.json() as { ok?: boolean; code?: string };
+  if (view.current() && staleCommunicationsAccess(result.code)) view.invalidate();
   return { ok: response.ok && result.ok === true, code: result.code };
 }
 
 export function CommunicationsSettings() {
-  const [loading,setLoading] = useState(true);
+  return <CommunicationsBoundary>{view => <ScopedSettings view={view} />}</CommunicationsBoundary>;
+}
+function ScopedSettings({ view }: { view: WorkspaceView }) {
+  const [loading,setLoading] = useState(false);
   const [access,setAccess] = useState<string | null>(null);
-  const [prefs,setPrefs] = useState<MessagingPreferences>(EMPTY_PREFERENCES);
-  const [budget,setBudget] = useState("");
-  const [contacts,setContacts] = useState<ConsentedNumber[]>([]);
+  const [prefs,setPrefs] = useState<MessagingPreferences>(view.preferences);
+  const [budget,setBudget] = useState(view.preferences.desiredDailyLimit === null ? "" : String(view.preferences.desiredDailyLimit));
+  const [contacts,setContacts] = useState<ConsentedNumber[]>(view.contacts);
   const [draft,setDraft] = useState<Draft>(blank);
   const [attested,setAttested] = useState(false);
   const [busy,setBusy] = useState(false);
   const [notice,setNotice] = useState("");
   const [error,setError] = useState("");
 
-  const load = useCallback(async () => {
+  // Refresh the authoritative directory while keeping unsaved preference and consent edits.
+  const [lastView, setLastView] = useState(view);
+  if (view !== lastView) {
+    setLastView(view);
+    setContacts(view.contacts);
+    setAccess(null);
+    const previousBudget = lastView.preferences.desiredDailyLimit === null ? "" : String(lastView.preferences.desiredDailyLimit);
+    if (prefs === lastView.preferences && budget === previousBudget) {
+      setPrefs(view.preferences);
+      setBudget(view.preferences.desiredDailyLimit === null ? "" : String(view.preferences.desiredDailyLimit));
+    }
+  }
+
+  async function load() {
     setLoading(true);
     try {
       const response = await fetch("/api/settings/communications", { cache:"no-store", credentials:"same-origin" });
       const result = await response.json() as Load;
+      if (!view.current()) return;
+      if (staleCommunicationsAccess(result.code) || (result.ok && result.scopeId !== view.scopeId)) { view.invalidate(); return; }
       if (!response.ok || !result.ok || !result.preferences || !Array.isArray(result.contacts)) {
         setAccess(result.code ?? "SETTINGS_UNAVAILABLE");
         return;
@@ -50,8 +72,7 @@ export function CommunicationsSettings() {
       setContacts(result.contacts);
     } catch { setAccess("SETTINGS_UNAVAILABLE"); }
     finally { setLoading(false); }
-  }, []);
-  useEffect(() => { queueMicrotask(() => { void load(); }); }, [load]);
+  }
 
   async function savePreferences(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -62,7 +83,7 @@ export function CommunicationsSettings() {
     }
     setBusy(true); setError(""); setNotice("");
     try {
-      const result = await request("preferences", { ...prefs, desiredDailyLimit:limit });
+      const result = await request(view, "preferences", { ...prefs, desiredDailyLimit:limit });
       if (!result.ok) { setError(result.code === "SETTINGS_CHANGED_REFRESH" ? "Someone updated these settings. Refresh and review before saving." : "The settings could not be saved."); return; }
       setNotice("Workspace preferences saved to Neon. Provider configuration was not changed.");
       await load();
@@ -75,7 +96,7 @@ export function CommunicationsSettings() {
     if (!attested) { setError("Confirm that you have appropriate consent evidence for these channels."); return; }
     setBusy(true); setError(""); setNotice("");
     try {
-      const result = await request("consent", { ...draft, consentedAt: new Date().toISOString() });
+      const result = await request(view, "consent", { ...draft, consentedAt: new Date().toISOString() });
       if (!result.ok) {
         setError(result.code === "SETTINGS_CHANGED_REFRESH"
           ? "That number has been updated. Refresh and review it before changing consent."
@@ -92,7 +113,7 @@ export function CommunicationsSettings() {
   async function revoke(contact: ConsentedNumber) {
     setBusy(true); setError(""); setNotice("");
     try {
-      const result = await request("revoke", { phoneE164:contact.phoneE164, revision:contact.revision });
+      const result = await request(view, "revoke", { phoneE164:contact.phoneE164, revision:contact.revision });
       if (!result.ok) { setError("Could not record revocation. Refresh and try again."); return; }
       setNotice("Consent revoked in Xtreme Avatar's Neon records. Verify provider suppression lists separately.");
       await load();

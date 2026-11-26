@@ -66,6 +66,9 @@
   --ink: #07090c;
   --surface: #111419;
   --surface-soft: #1a1e24;
+  --card-surface: linear-gradient(140deg, #24282ee8, #101216f2);
+  --card-border-color: #665633;
+  --card-shadow: 0 5px 16px #0003;
   --silver: #c9cbd0;
   --white: #f9f9fb;
   --gold: #ffd167;
@@ -305,9 +308,9 @@ h1 {
 
 .metal-card,
 .deliverable-row {
-  border: 1px solid #d8b66a;
-  background: linear-gradient(105deg, #414448, #898d91 13%, #494d51 27%, #777b7e 41%, #33363b 58%, #282b30 88%, #6b6e73);
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.36), 0 3px 9px rgba(230, 181, 99, 0.14);
+  border: 1px solid var(--card-border-color);
+  background: var(--card-surface);
+  box-shadow: var(--card-shadow);
 }
 
 .metal-card {
@@ -506,7 +509,7 @@ h1 {
   padding: 28px 30px;
   border: 2px solid #ffe3a0;
   border-radius: 18px;
-  background: linear-gradient(95deg, #666a6c, #b1b3b5 13%, #54575b 31%, #3a3d42 50%, #7d8085 72%, #4c5053);
+  background: var(--card-surface);
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.44), 0 3px 17px rgba(255, 209, 108, 0.42);
 }
 

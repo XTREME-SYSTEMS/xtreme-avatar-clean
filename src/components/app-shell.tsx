@@ -22,6 +22,7 @@ const workRoutes = new Set(["/workspace", "/mail", "/drive", "/calendar", "/cont
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  if (pathname === "/mobile" || pathname.startsWith("/mobile/")) return <>{children}</>;
   const focus = pathname === "/video" || pathname === "/create";
   const screen = screens[pathname] ?? "home";
   const chromeScreen = focus ? "home" : screen;

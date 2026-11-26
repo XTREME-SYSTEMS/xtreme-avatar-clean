@@ -1,0 +1,20 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "xtreme-avatar",
+  "version": "0.1.0",
+  "description": "Get public launch links for Xtreme Avatar on the web and mobile.",
+  "author": { "name": "Xtreme Systems" },
+  "repository": "https://github.com/XTREME-SYSTEMS/xtreme-avatar-clean",
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Xtreme Avatar",
+        "shortDescription": "Open Xtreme Avatar",
+        "longDescription": "Ask for public links to the Xtreme Avatar home or mobile home.",
+        "developerName": "Xtreme Systems",
+        "category": "Productivity",
+        "defaultPrompt": "Give me the link to Xtreme Avatar on mobile."
+      }
+    }
+  }
+}
