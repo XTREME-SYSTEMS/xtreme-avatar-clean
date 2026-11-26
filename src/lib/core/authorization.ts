@@ -17,7 +17,7 @@ export type VerifiedNeonIdentity = {
 };
 type Env = Record<string, string | undefined>;
 export type CoreAuthorization =
-  | { status: "ready"; token: string; origin: string; scopeId: string }
+  | { status: "ready"; token: string; origin: string; scopeId: string; expiresAt: number }
   | { status: "not_connected"; code: "core_bridge_not_configured" | "core_bridge_invalid" }
   | { status: "access_denied"; code: "core_identity_not_granted" | "session_expired" | "voice_not_granted" };
 
@@ -92,7 +92,7 @@ export function createCoreAuthorization(identity: VerifiedNeonIdentity, env: Env
     });
     const unsigned = `${header}.${claims}`;
     const token = `${unsigned}.${sign("RSA-SHA256", Buffer.from(unsigned), key).toString("base64url")}`;
-    return { status: "ready", token, origin: CORE_ORIGIN, scopeId: identityScopeId(identity) };
+    return { status: "ready", token, origin: CORE_ORIGIN, scopeId: identityScopeId(identity), expiresAt: Math.floor(expiry) };
   } catch {
     // Do not leak private-key parse errors, binding records or service configuration.
     return { status: "not_connected", code: "core_bridge_invalid" };

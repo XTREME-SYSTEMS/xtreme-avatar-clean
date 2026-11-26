@@ -23,8 +23,9 @@
   gap: 1rem;
   margin-top: 1.75rem;
   padding: 1.3rem;
-  background: linear-gradient(135deg, #23211e, #151618 70%);
-  border: 1px solid #45413c;
+  background: var(--card-surface);
+  border: 1px solid var(--card-border-color);
+  box-shadow: var(--card-shadow);
   border-radius: 1.2rem;
 }
 .emblem {

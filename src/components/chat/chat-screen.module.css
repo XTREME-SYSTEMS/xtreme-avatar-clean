@@ -7,7 +7,7 @@
 .modeLinks { display: flex; gap: 18px; padding-bottom: 11px; border-bottom: 1px solid #d8b66a66; }
 .modeLinks span { color: #fff4d6; font-size: 13px; font-weight: 700; }
 .notice { padding: 13px 15px; border-left: 2px solid #d8b66a; border-radius: 6px; background: #11171c80; font-size: 13px; line-height: 1.55; overflow-wrap: anywhere; }
-.setup, .recovery { border: 1px solid #d8b66a; border-radius: 18px; background: var(--metal-silver); padding: 20px 16px; box-shadow: inset 0 1px 1px #ffffff40, 0 3px 10px #0005; }
+.setup, .recovery { border: 1px solid var(--card-border-color); border-radius: 18px; background: var(--card-surface); padding: 20px 16px; box-shadow: var(--card-shadow); }
 .setup h2, .empty h2 { margin: 0 0 8px; font-size: 19px; }
 .setup p, .empty p { margin: 0 0 18px; color: var(--silver); line-height: 1.55; font-size: 13px; }
 .setup > div { display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }

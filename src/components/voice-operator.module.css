@@ -1,0 +1,10 @@
+.launcher { position: fixed; z-index: 20; right: max(14px, calc((100vw - 472px) / 2)); bottom: calc(68px + env(safe-area-inset-bottom, 0px)); }
+.open, .controls button, .header button { border: 1px solid #987c49; border-radius: 9px; background: var(--card-surface); color: #f4e5c3; padding: 8px 12px; min-height: 40px; font: inherit; font-size: 13px; cursor: pointer; }
+.popup { width: min(285px, calc(100vw - 28px)); padding: 12px; background: #111419; border: 1px solid #987c49; box-shadow: 0 8px 20px #0008; border-radius: 14px; }
+.header { display: flex; align-items: center; justify-content: space-between; }
+.controls { color: #eee6d8; overflow-wrap: anywhere; font-size: 13px; }
+.controls p { margin: 8px 0; }
+.controls button + button { margin-left: 8px; }
+.controls a { color: #f0d296; text-decoration: underline; }
+.consent { color: #d1c8b8; font-size: 12px; }
+.transcript { max-height: 9em; overflow-y: auto; }

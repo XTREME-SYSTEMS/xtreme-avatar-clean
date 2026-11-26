@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { generateKeyPairSync } from "node:crypto";
 import { createCoreAuthorization, CORE_ORIGIN, CHAT_SCOPES, NEON_ISSUER, identityScopeId } from "../src/lib/core/authorization.ts";
 import { handleVoiceRequest } from "../src/lib/core/voice.ts";
+import { handleGatewayLive, liveModel } from "../src/lib/voice/gateway-live.ts";
 
 const now = Math.floor(Date.now() / 1000);
 const iso = (timestamp: number) => new Date(timestamp * 1000).toISOString();
@@ -36,6 +37,51 @@ const metadata = { model: "gpt-live-1", voice: "marin", verification: "model_met
   reasoningModel: "gpt-reasoning-fixture", voiceHistoryPersistence: true };
 const getIdentity = async () => ({ status: "authenticated" as const, identity });
 const neverFetch: typeof fetch = async () => { throw Error("unexpected upstream request"); };
+
+test("Gateway Live checks membership, workspace, request origin and issuance quota before requesting a provider token", async () => {
+  let reserved = 0;
+  let requested = 0;
+  const settings = { ...env, AVATAR_GATEWAY_LIVE_ENABLED: "true", AI_GATEWAY_API_KEY: "fixture-private-key", AVATAR_SETTINGS_DATABASE_URL: "fixture-db" };
+  const providerToken = "test-session-token-at-least-16-chars";
+  const dependencies = {
+    env: settings,
+    getIdentity,
+    verifyHostedGrant: async () => true,
+    verifyQuotaStore: async () => true,
+    reserve: async (input: string) => {
+      assert.equal(input, scopeId);
+      reserved++;
+      return true;
+    },
+    fetch: (async (url, options) => {
+      requested++;
+      assert.equal(url, "https://ai-gateway.vercel.sh/v1/realtime/client-secrets");
+      assert.equal(new Headers(options?.headers).get("authorization"), "Bearer fixture-private-key");
+      assert.deepEqual(JSON.parse(String(options?.body)), { model: liveModel, routeKind: "live", expiresIn: 15 });
+      return Response.json({ token: providerToken, expiresAt: now + 15, sensitive: "not returned" });
+    }) as typeof fetch,
+  };
+  assert.equal((await handleGatewayLive(req({ scopeId }, "https://other.example.com"), dependencies)).status, 403);
+  assert.equal((await handleGatewayLive(req({ scopeId: "a".repeat(64) }), dependencies)).status, 403);
+  assert.equal((await handleGatewayLive(req({ scopeId, model: "another" }), dependencies)).status, 400);
+  assert.equal((await handleGatewayLive(req({ scopeId }), { ...dependencies, getIdentity: async () => ({ status: "anonymous" }) })).status, 401);
+  assert.equal((await handleGatewayLive(req({ scopeId }), { ...dependencies, env: { ...settings, AVATAR_GATEWAY_LIVE_ENABLED: "false" } })).status, 503);
+  assert.equal((await handleGatewayLive(req({ scopeId }), { ...dependencies, reserve: async () => false })).status, 429);
+  assert.equal((await handleGatewayLive(req({ scopeId }), { ...dependencies, reserve: async () => null })).status, 503);
+  assert.equal((await handleGatewayLive(req({ scopeId }), { ...dependencies, verifyHostedGrant: async () => false })).status, 503);
+  const nearExpiry = configure({ ...binding, voiceGrant: { ...voiceGrant, expiresAt: iso(now + 10) } });
+  assert.equal((await handleGatewayLive(req({ scopeId }), { ...dependencies, env: { ...settings, ...nearExpiry } })).status, 403);
+  assert.equal((await handleGatewayLive(req(), { ...dependencies, verifyQuotaStore: async () => false })).status, 503);
+  assert.deepEqual(await (await handleGatewayLive(req(), dependencies)).json(), { scopeId, model: liveModel, voice: "gleam" });
+  assert.equal(requested, 0);
+  assert.equal(reserved, 0);
+  const reply = await handleGatewayLive(req({ scopeId }), dependencies);
+  assert.equal(reply.status, 200);
+  assert.match(reply.headers.get("cache-control") ?? "", /no-store/);
+  assert.deepEqual(await reply.json(), { token: providerToken, expiresAt: now + 15, scopeId, model: liveModel, voice: "gleam" });
+  assert.equal(requested, 1);
+  assert.equal(reserved, 1);
+});
 function req(body?: object, originHeader = origin) {
   return new Request(origin, body ? { method: "POST", headers: { origin: originHeader, "content-type": "application/json" }, body: JSON.stringify(body) } : {});
 }

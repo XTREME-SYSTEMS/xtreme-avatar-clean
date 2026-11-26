@@ -9,6 +9,7 @@
   },
   "canonical": {
     "frontend_design": "https://www.figma.com/design/16F1Pcf7WN23HfBlBBx2Mf",
+    "frontend_v4_master": "https://www.figma.com/design/QL4pYJBnwyfa2xiPOfGFUJ?node-id=42-10",
     "completion_center_node": "42:545",
     "identity": {
       "provider": "Neon Auth / Managed Better Auth",

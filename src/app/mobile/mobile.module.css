@@ -35,6 +35,7 @@
   background: #181918; color: var(--ivory); font-size: 15px; font-weight: 560;
 }
 .primary { color: #171510; background: var(--gold); border-color: var(--gold); }
+.secondary, .composer, .info { background: var(--card-surface); border-color: var(--card-border-color); box-shadow: var(--card-shadow); }
 .secondary svg, .round { color: var(--gold); }
 .composer { margin-top: 17px; color: var(--muted); justify-content: flex-start; font-size: 14px; font-weight: 400; }
 .canvas a:focus-visible, .canvas button:focus-visible { outline: 2px solid #e7cd99; outline-offset: 3px; }

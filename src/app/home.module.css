@@ -20,7 +20,7 @@
 .quickActions { margin-top: 20px; }
 .quickActions h2, .priorities h2 { margin: 0; font: 700 22.564px/27px "Inter:Bold", Inter, sans-serif; letter-spacing: -0.02em; }
 .actionGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 16px; }
-.actionTile { position: relative; display: block; width: 100%; min-width: 0; aspect-ratio: 126.359 / 103.795; padding: 0; color: #fafafb; opacity: 1; border: 1.6px solid #e4be6d; border-radius: 20.308px; background: var(--metal-silver); box-shadow: 0 3px 8px #0007, 0 3px 9px #deae5542; }
+.actionTile { position: relative; display: block; width: 100%; min-width: 0; aspect-ratio: 126.359 / 103.795; padding: 0; color: #fafafb; opacity: 1; border: 1.6px solid var(--card-border-color); border-radius: 20.308px; background: var(--card-surface); box-shadow: var(--card-shadow); }
 .actionTile:disabled { cursor: not-allowed; }
 .actionTile img { position: absolute; top: 16px; left: 50%; transform: translateX(-50%); display: block; max-width: none; }
 .actionTile > span { position: absolute; bottom: 13px; left: 0; right: 0; text-align: center; font: 600 15.231px/18px "Inter:Semi Bold", Inter, sans-serif; }
@@ -28,7 +28,7 @@
 .priorities { margin-top: 9px; }
 .priorityHeading { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .priorityList { display: grid; gap: 6.5px; margin-top: 10px; }
-.priorityRow { position: relative; display: block; height: 52px; border: 1.4px solid #d0b57f; border-radius: 13.538px; background: linear-gradient(90deg, #595b5c, #a2a3a3 11%, #585c60 28%, #42474b 52%, #85898d 73%, #55585d); box-shadow: 0 3px 7px #0008, 0 3px 10px #f5d28a30; }
+.priorityRow { position: relative; display: block; height: 52px; border: 1.4px solid var(--card-border-color); border-radius: 13.538px; background: var(--card-surface); box-shadow: var(--card-shadow); }
 .priorityIcon { position: absolute; display: block; max-width: none; left: 15px; top: 11px; }
 .priorityDivider { position: absolute; left: 67px; top: 9px; height: 31.6px; width: 1.1px; background: #716f71; }
 .priorityCopy { position: absolute; left: 86px; top: 7px; right: 34px; display: flex; flex-direction: column; }
