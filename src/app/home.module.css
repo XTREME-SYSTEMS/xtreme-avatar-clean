@@ -73,3 +73,14 @@
 @media (prefers-reduced-motion: reduce) { .actionTile, .talk { transition: none; } }
 .chatLink { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: #ffe1a2; font-size: 13px; line-height: 1.5; padding: 4px 2px; }
 .chatLink:focus-visible { outline: 2px solid #fff1be; outline-offset: 4px; border-radius: 4px; }
+
+
+@media (min-width: 860px) {
+  .intro h1 { font-size: clamp(2.1rem, 4vw, 3.6rem); line-height: 1.12; }
+  .talk { margin-top: 1.2rem; }
+  .chatLink { justify-content: start; min-height: 44px; }
+  .actionTile { aspect-ratio: auto; min-height: 106px; }
+}
+@media (min-width: 1120px) {
+  .actionGrid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}
