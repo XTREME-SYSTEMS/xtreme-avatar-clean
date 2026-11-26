@@ -13,6 +13,7 @@
     "check": "npm run lint && npm run typecheck && npm run test:cleanroom && npm run test:integration"
   },
   "dependencies": {
+    "@neondatabase/serverless": "1.2.1",
     "next": "16.4.6",
     "react": "19.2.0",
     "react-dom": "19.2.0",
