@@ -13,11 +13,12 @@ and memory boundary.
 ## Client behavior
 
 The phone and mobile voice pages and the persistent control share one in-app
-session across client-side routes. The app uses the Gateway's GPT-Live
-WebSocket and starts audio only after OpenAI confirms Gleam. Its deployment
-flag defaults off. The mic stops on call end, hidden page, sign-out, or scope
-change. Browser playback and transcript are session-local. This voice path does
-not write shared Core history.
+session across client-side routes. Eden Core owns the OpenAI GPT-Live connection
+and confirms Gleam before the app starts microphone streaming. A one-time Core
+ticket connects the browser to the relay. The signed-in app renews the server
+lease with a fresh Neon session, membership and mission-bound delegation. The
+app stops its microphone on call end, hidden page, sign-out or scope change.
+Browser playback and transcripts are session-local.
 
 Example commands while voice is in progress:
 
@@ -42,8 +43,8 @@ tenant-scoped tools and their own permission and receipt checks.
 
 `openai/gpt-realtime-2` and GPT-Live use different Gateway endpoints. Realtime 2
 uses the existing Node runtime and the Gateway provider SDK for the proof.
-Gleam is documented in the GPT-Live output-audio settings, so the standalone
-app selects GPT-Live without silently changing the user-selected voice.
+The Gateway canaries exercise the two provider protocols independently of the
+app's Core relay. Gleam is documented in the GPT-Live output-audio settings.
 
 ```powershell
 node --env-file-if-exists=.env.local realtime-smoke.mjs
@@ -65,19 +66,11 @@ proof logs. Use the linked deployment's Vercel OIDC identity when configured.
 
 ## Deployment gates
 
-On the existing clean preview, verify the exact Neon trusted origin and a
-signed, finite Core identity and voice grant. Apply
-`architecture/gateway-live-issuance.sql` to the approved Avatar application
-database using the existing settings role and review rollback. The token
-endpoint fails closed if the migration, credential, or verified workspace
-grant is missing. It allows at most one reserved token per minute and six in
-a UTC day per user/workspace scope. A failed provider call still consumes its
-reservation. Confirm the provider's team-level spending cap independently.
-
-Keep the preview separate from the legacy production domain. Verify signed-in
-microphone playback, scope switching, denial at the configured budget, and
-provider receipts before enabling production. The current direct Gateway route
-uses a short-lived admission token. Its browser call limit is not a server-side
-revocation or session cutoff. Confirm provider-enforced session limits or a
-trusted relay before production enablement.
+Keep `AVATAR_CORE_LIVE_RELAY_ENABLED=false` until the exact staging release,
+approved Core signer, tenant-bound owner grant, Core relay quota and retention
+policy are verified. Core owns the start reservation and cutoff. The earlier
+Avatar Gateway issuance table is retained for rollback records. Test the
+configured deadline, grant expiry, revocation and loss of the browser while
+checking upstream close and usage receipts. Verify signed-in playback, budget
+denial and role isolation before requesting production cutover.
 [ChatGPT MCP launcher](XTREME_AVATAR_MCP.md) · [Release gates](RELEASE_GATES.md)

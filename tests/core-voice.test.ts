@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { generateKeyPairSync } from "node:crypto";
 import { createCoreAuthorization, CORE_ORIGIN, CHAT_SCOPES, NEON_ISSUER, identityScopeId } from "../src/lib/core/authorization.ts";
 import { handleVoiceRequest } from "../src/lib/core/voice.ts";
-import { handleGatewayLive, liveModel } from "../src/lib/voice/gateway-live.ts";
+import { handleCoreLiveRelay } from "../src/lib/voice/core-live-relay.ts";
 
 const now = Math.floor(Date.now() / 1000);
 const iso = (timestamp: number) => new Date(timestamp * 1000).toISOString();
@@ -38,49 +38,69 @@ const metadata = { model: "gpt-live-1", voice: "marin", verification: "model_met
 const getIdentity = async () => ({ status: "authenticated" as const, identity });
 const neverFetch: typeof fetch = async () => { throw Error("unexpected upstream request"); };
 
-test("Gateway Live checks membership, workspace, request origin and issuance quota before requesting a provider token", async () => {
-  let reserved = 0;
-  let requested = 0;
-  const settings = { ...env, AVATAR_GATEWAY_LIVE_ENABLED: "true", AI_GATEWAY_API_KEY: "fixture-private-key", AVATAR_SETTINGS_DATABASE_URL: "fixture-db" };
-  const providerToken = "test-session-token-at-least-16-chars";
+test("the relay admits only a fresh owner, a scoped Core ticket, and the same mission for lease renewal", async () => {
+  const paths: string[] = [];
+  const settings = { ...env, AVATAR_CORE_LIVE_RELAY_ENABLED: "true" };
+  const ticketRequest = { scopeId, requestKey: receiptId };
+  const renewal = { scopeId, missionId };
+  const ticket = "a".repeat(43);
+  const model = "gpt-live-1";
+  const socketUrl = CORE_ORIGIN.replace("https:", "wss:") + "/v1/media/relay/socket";
+  const expiresAt = now + 12;
+  const leaseExpiresAt = iso(now + 10);
+  const deadlineAt = iso(now + 300);
+  let grantId = "";
   const dependencies = {
     env: settings,
     getIdentity,
-    verifyHostedGrant: async () => true,
-    verifyQuotaStore: async () => true,
-    reserve: async (input: string) => {
-      assert.equal(input, scopeId);
-      reserved++;
-      return true;
-    },
     fetch: (async (url, options) => {
-      requested++;
-      assert.equal(url, "https://ai-gateway.vercel.sh/v1/realtime/client-secrets");
-      assert.equal(new Headers(options?.headers).get("authorization"), "Bearer fixture-private-key");
-      assert.deepEqual(JSON.parse(String(options?.body)), { model: liveModel, routeKind: "live", expiresIn: 15 });
-      return Response.json({ token: providerToken, expiresAt: now + 15, sensitive: "not returned" });
+      const path = new URL(String(url)).pathname;
+      paths.push(path);
+      assert.equal(new URL(String(url)).origin, CORE_ORIGIN);
+      const grant = claims(new Headers(options?.headers).get("authorization")!.slice(7));
+      assert.equal(grant.scope, "voice:relay");
+      assert.match(grant.voice_grant_id, /^[a-f0-9]{64}$/);
+      grantId ||= grant.voice_grant_id;
+      assert.equal(grant.voice_grant_id, grantId);
+      assert.equal(grant.voice_grant_expires_at, now + 300);
+      assert.equal(grant.exp - grant.iat, 20);
+      if (path.endsWith("/readiness")) {
+        assert.equal(options?.method, "GET");
+        return Response.json({ ready: true, model, voice: "gleam", extra: "private" });
+      }
+      if (path.endsWith("/tickets")) {
+        assert.deepEqual(JSON.parse(String(options?.body)), { requestKey: receiptId });
+        assert.ok(!("voice_relay_mission_id" in grant));
+        return Response.json({ ticket, missionId, expiresAt, socketUrl, voice: "gleam", model, leaseRenewAfterMs: 3000, extra: "private" }, { status: 201 });
+      }
+      assert.equal(path, "/v1/media/relay/" + missionId + "/lease");
+      assert.equal(grant.voice_relay_mission_id, missionId);
+      assert.deepEqual(JSON.parse(String(options?.body)), {});
+      return Response.json({ missionId, leaseExpiresAt, deadlineAt, extra: "private" });
     }) as typeof fetch,
   };
-  assert.equal((await handleGatewayLive(req({ scopeId }, "https://other.example.com"), dependencies)).status, 403);
-  assert.equal((await handleGatewayLive(req({ scopeId: "a".repeat(64) }), dependencies)).status, 403);
-  assert.equal((await handleGatewayLive(req({ scopeId, model: "another" }), dependencies)).status, 400);
-  assert.equal((await handleGatewayLive(req({ scopeId }), { ...dependencies, getIdentity: async () => ({ status: "anonymous" }) })).status, 401);
-  assert.equal((await handleGatewayLive(req({ scopeId }), { ...dependencies, env: { ...settings, AVATAR_GATEWAY_LIVE_ENABLED: "false" } })).status, 503);
-  assert.equal((await handleGatewayLive(req({ scopeId }), { ...dependencies, reserve: async () => false })).status, 429);
-  assert.equal((await handleGatewayLive(req({ scopeId }), { ...dependencies, reserve: async () => null })).status, 503);
-  assert.equal((await handleGatewayLive(req({ scopeId }), { ...dependencies, verifyHostedGrant: async () => false })).status, 503);
-  const nearExpiry = configure({ ...binding, voiceGrant: { ...voiceGrant, expiresAt: iso(now + 10) } });
-  assert.equal((await handleGatewayLive(req({ scopeId }), { ...dependencies, env: { ...settings, ...nearExpiry } })).status, 403);
-  assert.equal((await handleGatewayLive(req(), { ...dependencies, verifyQuotaStore: async () => false })).status, 503);
-  assert.deepEqual(await (await handleGatewayLive(req(), dependencies)).json(), { scopeId, model: liveModel, voice: "gleam" });
-  assert.equal(requested, 0);
-  assert.equal(reserved, 0);
-  const reply = await handleGatewayLive(req({ scopeId }), dependencies);
-  assert.equal(reply.status, 200);
+  assert.equal((await handleCoreLiveRelay(req(ticketRequest, "https://other.example.com"), dependencies)).status, 403);
+  assert.equal((await handleCoreLiveRelay(req({ ...ticketRequest, scopeId: "a".repeat(64) }), dependencies)).status, 403);
+  assert.equal((await handleCoreLiveRelay(req({ scopeId, missionId: "../profile" }), dependencies)).status, 400);
+  assert.equal((await handleCoreLiveRelay(req({ ...ticketRequest, model: "another" }), dependencies)).status, 400);
+  assert.equal((await handleCoreLiveRelay(req(renewal), { ...dependencies, getIdentity: async () => ({ status: "anonymous" }) })).status, 401);
+  assert.equal((await handleCoreLiveRelay(req(renewal), { ...dependencies, getIdentity: async () => ({ status: "access_denied" }) })).status, 403);
+  assert.equal((await handleCoreLiveRelay(req(ticketRequest), { ...dependencies, env })).status, 503);
+  const nearExpiry = configure({ ...binding, voiceGrant: { ...voiceGrant, expiresAt: iso(now + 4) } });
+  assert.equal((await handleCoreLiveRelay(req(renewal), { ...dependencies, env: { ...settings, ...nearExpiry } })).status, 403);
+  assert.equal(paths.length, 0);
+  assert.deepEqual(await (await handleCoreLiveRelay(req(), dependencies)).json(), { scopeId, model, voice: "gleam" });
+  const reply = await handleCoreLiveRelay(req(ticketRequest), dependencies);
+  assert.equal(reply.status, 201);
   assert.match(reply.headers.get("cache-control") ?? "", /no-store/);
-  assert.deepEqual(await reply.json(), { token: providerToken, expiresAt: now + 15, scopeId, model: liveModel, voice: "gleam" });
-  assert.equal(requested, 1);
-  assert.equal(reserved, 1);
+  assert.deepEqual(await reply.json(), { ticket, missionId, expiresAt, scopeId, model, voice: "gleam", socketUrl, leaseRenewAfterMs: 3000 });
+  assert.deepEqual(await (await handleCoreLiveRelay(req(renewal), dependencies)).json(), {
+    scopeId, missionId, leaseExpiresAt: Date.parse(leaseExpiresAt), deadlineAt: Date.parse(deadlineAt),
+  });
+  assert.equal(paths.length, 3);
+  const mismatch = { ...dependencies, fetch: async () => Response.json({ ticket, missionId, expiresAt, socketUrl: "wss://elsewhere.example/socket", voice: "gleam", model, leaseRenewAfterMs: 3000 }, { status: 201 }) };
+  assert.equal((await handleCoreLiveRelay(req(ticketRequest), mismatch)).status, 502);
+  assert.equal((await handleCoreLiveRelay(req(renewal), { ...dependencies, fetch: async () => new Response(null, { status: 403 }) })).status, 403);
 });
 function req(body?: object, originHeader = origin) {
   return new Request(origin, body ? { method: "POST", headers: { origin: originHeader, "content-type": "application/json" }, body: JSON.stringify(body) } : {});
@@ -98,13 +118,25 @@ test("chat cannot inherit media scopes; media requires independent finite author
     if (operation === "voice-readiness" || operation === "voice-start") assert.equal(payload.exp, now + 19);
     assert.equal(createCoreAuthorization({ ...identity, role: "member" }, env, now, operation).status, "access_denied");
   }
-  for (const operation of ["voice-readiness", "voice-start", "voice-end"] as const) {
+  for (const operation of ["voice-readiness", "voice-start", "voice-end", "voice-relay"] as const) {
     assert.equal(createCoreAuthorization(identity, configure(binding), now, operation).status, "access_denied");
   }
   const expired = configure({ ...binding, voiceGrant: { ...voiceGrant, expiresAt: iso(now - 1) } });
   assert.equal(createCoreAuthorization(identity, expired, now, "voice-start").status, "access_denied");
   assert.equal(createCoreAuthorization(identity, expired, now, "voice-end").status, "ready");
+  assert.equal(createCoreAuthorization(identity, expired, now, "voice-relay").status, "access_denied");
   assert.equal(createCoreAuthorization(identity, configure({ ...binding, voiceGrant: { ...voiceGrant, scope: "*" } }), now, "voice-start").status, "not_connected");
+});
+
+test("relay delegations bind the active Neon session and cap provider authority at the earliest expiry", () => {
+  const shortSession = { ...identity, sessionExpiresAt: iso(now + 18) };
+  const auth = createCoreAuthorization(shortSession, env, now, "voice-relay", missionId);
+  const otherLogin = createCoreAuthorization({ ...shortSession, sessionId: "new-fixture-session" }, env, now, "voice-relay", missionId);
+  assert.ok(auth.status === "ready" && otherLogin.status === "ready");
+  assert.equal(claims(auth.token).voice_grant_expires_at, now + 18);
+  assert.equal(claims(auth.token).voice_relay_mission_id, missionId);
+  assert.equal(claims(auth.token).exp, now + 18);
+  assert.notEqual(claims(auth.token).voice_grant_id, claims(otherLogin.token).voice_grant_id);
 });
 
 test("cross-origin, stale workspace, unsupported fields, invalid SDP, size and method are rejected before provider dispatch", async () => {

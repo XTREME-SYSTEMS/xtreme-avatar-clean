@@ -31,7 +31,7 @@ export function identityScopeId(identity: Pick<VerifiedNeonIdentity, "issuer" | 
   return createHash("sha256").update(JSON.stringify([identity.issuer, identity.userId, identity.organizationId])).digest("hex");
 }
 
-type Delegation = "chat" | "voice-readiness" | "voice-start" | "voice-end";
+type Delegation = "chat" | "voice-readiness" | "voice-start" | "voice-end" | "voice-relay";
 
 function validVoiceGrant(grant: unknown): grant is { approvalRef: string; expiresAt: string } {
   return record(grant) && Object.keys(grant).sort().join(",") === "approvalRef,expiresAt"
@@ -40,7 +40,7 @@ function validVoiceGrant(grant: unknown): grant is { approvalRef: string; expire
 }
 
 /** Called only after a fresh provider session and membership read. No static owner bearer. */
-export function createCoreAuthorization(identity: VerifiedNeonIdentity, env: Env, now = Math.floor(Date.now() / 1_000), delegation: Delegation = "chat"): CoreAuthorization {
+export function createCoreAuthorization(identity: VerifiedNeonIdentity, env: Env, now = Math.floor(Date.now() / 1_000), delegation: Delegation = "chat", relayMissionId?: string): CoreAuthorization {
   if (env.CORE_CHAT_ENABLED !== "true") return { status: "not_connected", code: "core_bridge_not_configured" };
   const names = ["CORE_API_BASE_URL", "CORE_AUTH_ISSUER", "CORE_AUTH_AUDIENCE", "CORE_AUTH_CLIENT_ID", "CORE_AUTH_KEY_ID", "CORE_AUTH_PRIVATE_KEY", "CORE_IDENTITY_BINDINGS_JSON", "AVATAR_APP_ORIGIN"] as const;
   if (names.some(name => !env[name])) return { status: "not_connected", code: "core_bridge_not_configured" };
@@ -68,7 +68,9 @@ export function createCoreAuthorization(identity: VerifiedNeonIdentity, env: Env
     if (!Number.isFinite(sessionExpiry) || sessionExpiry <= now + 5) return { status: "access_denied", code: "session_expired" };
     if (!selected || selected.neonMemberId !== identity.memberId || selected.neonRole !== identity.role || Date.parse(selected.expiresAt as string) / 1_000 <= now + 5) return { status: "access_denied", code: "core_identity_not_granted" };
     let scope = CHAT_SCOPES;
-    let expiry = Math.min(now + 60, sessionExpiry, Date.parse(selected.expiresAt as string) / 1_000);
+    const identityExpiry = Math.min(sessionExpiry, Date.parse(selected.expiresAt as string) / 1_000);
+    let expiry = Math.min(now + 60, identityExpiry);
+    let relayClaims: Record<string, string | number> | undefined;
     if (delegation !== "chat") {
       const grant = selected.voiceGrant;
       if (!validVoiceGrant(grant)) return { status: "access_denied", code: "voice_not_granted" };
@@ -79,6 +81,20 @@ export function createCoreAuthorization(identity: VerifiedNeonIdentity, env: Env
         if (expiry <= now + 5) return { status: "access_denied", code: "voice_not_granted" };
       }
       if (delegation === "voice-start" || delegation === "voice-end") scope += " task:submit";
+      if (delegation === "voice-relay") {
+        if (relayMissionId && !canonicalCoreUuid.test(relayMissionId)) throw new Error("invalid_relay_mission");
+        scope = "voice:relay";
+        expiry = Math.min(expiry, now + 20);
+        const grantExpiresAt = Math.floor(Math.min(identityExpiry, Date.parse(grant.expiresAt) / 1_000));
+        const grantId = createHash("sha256").update(JSON.stringify([
+          identity.issuer, identity.userId, identity.organizationId, identity.memberId, identity.sessionId,
+          selected.coreUserId, selected.coreTenantId, selected.approvalRef, grant.approvalRef,
+        ])).digest("hex");
+        relayClaims = {
+          voice_grant_expires_at: grantExpiresAt, voice_grant_id: grantId,
+          ...(relayMissionId ? { voice_relay_mission_id: relayMissionId } : {}),
+        };
+      }
     }
     const key = createPrivateKey(env.CORE_AUTH_PRIVATE_KEY!);
     const details = key.asymmetricKeyDetails;
@@ -89,6 +105,7 @@ export function createCoreAuthorization(identity: VerifiedNeonIdentity, env: Env
       iss: env.CORE_AUTH_ISSUER, aud: env.CORE_AUTH_AUDIENCE, client_id: env.CORE_AUTH_CLIENT_ID,
       sub: selected.coreUserId, tenant_id: selected.coreTenantId, roles: ["owner"], scope,
       iat: now, exp: Math.floor(expiry), jti: randomUUID(),
+      ...relayClaims,
     });
     const unsigned = `${header}.${claims}`;
     const token = `${unsigned}.${sign("RSA-SHA256", Buffer.from(unsigned), key).toString("base64url")}`;

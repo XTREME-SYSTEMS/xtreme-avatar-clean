@@ -7,7 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { CANVAS_COMMAND_EVENT } from "@/lib/canvas-commands";
 import type { CanvasCommand, CanvasCommandEventDetail, CanvasCommandResult } from "@/lib/canvas-commands";
 import { pageName, readAppCommand } from "@/lib/voice/app-commands";
-import { GatewayLiveConnection } from "@/lib/voice/live-connection";
+import { LiveVoiceConnection } from "@/lib/voice/live-connection";
 import styles from "./voice-operator.module.css";
 
 type Phase = "idle" | "opening" | "connected" | "closing";
@@ -89,7 +89,7 @@ export function VoiceOperator({ children }: { children: ReactNode }) {
   const [transcript, setTranscript] = useState("");
   const [displayedReview, setDisplayedReview] = useState<{ id: symbol; label: string } | null>(null);
   const review = useRef<CanvasReview | null>(null);
-  const connection = useRef<GatewayLiveConnection | null>(null);
+  const connection = useRef<LiveVoiceConnection | null>(null);
   const audioSink = useRef<((pcm: string) => void) | null>(null);
   const scope = useRef("");
   const enabled = open || voicePage || phase !== "idle";
@@ -187,7 +187,7 @@ export function VoiceOperator({ children }: { children: ReactNode }) {
     const startScope = scope.current;
     if (!startScope || connection.current || availability !== "ready") return;
     setOpen(true); setPhase("opening"); setTranscript(""); setMuted(false); setMessage("Opening Gleam…");
-    const call = new GatewayLiveConnection({
+    const call = new LiveVoiceConnection({
       transcript: (line) => { if (connection.current === call) setTranscript(line); },
       audio: (pcm) => { if (connection.current === call && scope.current === startScope) audioSink.current?.(pcm); },
       delegate: (phrase) => {
