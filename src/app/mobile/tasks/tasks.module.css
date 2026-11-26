@@ -1,0 +1,10 @@
+.tasks { display: grid; align-content: start; gap: .85rem; width: min(100%,38rem); padding: 1.25rem 0 2rem; }
+.tasks h1 { font-size: clamp(2rem,8vw,3rem); line-height: 1.15; margin: 0; }
+.tasks p { margin: 0; color: #d1cec6; }
+.back { color: #f3d8a0; text-decoration: underline; text-underline-offset: .2em; min-height: 44px; display: inline-flex; align-items: center; width: fit-content; }
+.form { display: grid; gap: .55rem; background: #1b1c20; border: 1px solid #545259; border-radius: .8rem; padding: 1rem; }
+.form input { min-height: 44px; min-width: 0; padding: .6rem .75rem; font: inherit; color: #fff; background: #101113; border: 1px solid #79767e; border-radius: .45rem; }
+.form button { min-height: 44px; margin-top: .2rem; border: 0; border-radius: .5rem; background: #e7cc99; color: #1a1814; font: inherit; font-weight: 700; cursor: pointer; }
+.form button:disabled { opacity: .55; cursor: default; }
+.list { margin: 0; padding: 0; display: grid; gap: .45rem; list-style: none; }
+.list li { padding: .75rem; border-bottom: 1px solid #66616b; overflow-wrap: anywhere; }
