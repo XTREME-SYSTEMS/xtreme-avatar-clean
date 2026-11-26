@@ -31,7 +31,7 @@ const workspaceTools = [
   { name: "Images", icon: "imgIconImage", href: "/images" },
   { name: "Wallet", icon: "imgIconWallet", href: "/wallet" },
   { name: "Keep", icon: "imgIconNote", href: "/notes" },
-  { name: "Google Tasks", icon: "imgIconTasks", href: "/tasks" },
+  { name: "My tasks", icon: "imgIconTasks", href: "/mobile/tasks" },
 ] as const;
 
 export function WorkspaceScreen() {
@@ -70,6 +70,10 @@ export function TasksScreen() {
   const queueDescription = filter === "All" ? "Connect your account to see your work queue." : `Connect your account to see tasks marked ${filter.toLowerCase()}.`;
   return <div className={`${styles.screen} phone-screen`} data-design-node="42:445">
     <ScreenHeading title="Tasks · Auto Loop" description="Authorized requests become trackable work." />
+    <Link className={`${styles.panel} ${styles.permission}`} href="/mobile/tasks">
+      <PhoneIcon screen="tasks" name="imgIconFile" className={styles.rowIcon} />
+      <div><h2>My private tasks</h2><p>Create and revisit personal tasks in your verified workspace. These are not automatically dispatched to the AI work queue.</p><span className={styles.subtleLink}>Open my tasks <span aria-hidden="true">→</span></span></div>
+    </Link>
     <section className={`${styles.panel} ${styles.workflow}`} aria-label="Task workflow stages">
       <p className={styles.eyebrow}>TASK WORKFLOW</p>
       <ol>{["Needs input", "Ready", "Running", "Review", "Finished"].map((stage) => <li key={stage}>
