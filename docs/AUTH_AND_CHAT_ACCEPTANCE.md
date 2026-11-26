@@ -46,6 +46,12 @@ Required hosted checks after configuration:
 
 ## Configuration and rollout
 
+`vercel.json` disables automatic Git deployments for every branch with
+`git.deploymentEnabled: false`. Create review deployments explicitly as Preview
+deployments of the exact reviewed source revision. Production promotion and domain
+assignment remain gated by independent release checks and owner approval. See
+[Vercel's Git deployment configuration](https://vercel.com/docs/project-configuration/git-configuration).
+
 Only `NEON_AUTH_BASE_URL` and the exact `AVATAR_APP_ORIGIN` are needed for the
 account adapter. The auth origin is pinned to the existing verified Avatar branch.
 The preview host must be trusted by Neon. No new Neon project or branch is created.

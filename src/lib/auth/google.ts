@@ -37,13 +37,20 @@ export async function beginGoogleSignIn(
   const challenges = provider.changedCookies().filter((cookie) =>
     (cookie.name === CHALLENGE_COOKIE || cookie.name === LEGACY_CHALLENGE_COOKIE) && activeCookie(cookie),
   );
-  if (challenges.length !== 1) return { ok: false, code: "GOOGLE_CHALLENGE_UNVERIFIED", cookies: [] };
+  // Managed Neon currently emits both spellings with the same opaque value.
+  // Normalize only that trusted-provider compatibility pair to one browser
+  // cookie. Conflicting values and ambiguous incoming cookies still fail closed.
+  const challenge = challenges.length === 1 ? challenges[0]
+    : challenges.length === 2 && challenges[0].value === challenges[1].value
+      ? challenges.find((cookie) => cookie.name === CHALLENGE_COOKIE)
+      : undefined;
+  if (!challenge) return { ok: false, code: "GOOGLE_CHALLENGE_UNVERIFIED", cookies: [] };
   try {
     // The URL comes only from our fixed Neon Google endpoint, never caller input.
     // A shared Google provider may use a Neon relay, so do not invent its hostname.
     const url = new URL(result.data.url);
     if (url.protocol !== "https:" || url.username || url.password || url.hash) throw new Error("Invalid OAuth URL");
-    return { ok: true, url: url.toString(), cookies: [...clearChallengeCookies(), ...challenges] };
+    return { ok: true, url: url.toString(), cookies: [...clearChallengeCookies(), challenge] };
   } catch { return { ok: false, code: "GOOGLE_REDIRECT_UNVERIFIED", cookies: [] }; }
 }
 

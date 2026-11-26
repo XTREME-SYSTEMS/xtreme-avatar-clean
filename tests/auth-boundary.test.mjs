@@ -222,6 +222,30 @@ test('Google starts through fixed managed endpoint and callback and accepts redi
   assert.equal(unsafe.ok, false);
 });
 
+test('Google normalizes identical provider compatibility cookies to one canonical challenge', async () => {
+  for (const names of [[CHALLENGE_COOKIE, LEGACY_CHALLENGE_COOKIE], [LEGACY_CHALLENGE_COOKIE, CHALLENGE_COOKIE]]) {
+    const result = await beginGoogleSignIn(config, null, async () => json({
+      url: 'https://accounts.google.com/o/oauth2/v2/auth?state=provider-state', redirect: false,
+    }, 200, names.map((name) => `${name}=same-opaque-challenge; Max-Age=600; HttpOnly; Secure; SameSite=None; Partitioned`)));
+    assert.equal(result.ok, true);
+    const active = result.cookies.filter((entry) => entry.value && entry.maxAge !== 0);
+    assert.deepEqual(active.map(({ name, value, maxAge }) => ({ name, value, maxAge })), [
+      { name: CHALLENGE_COOKIE, value: 'same-opaque-challenge', maxAge: 600 },
+    ]);
+    assert.equal(result.cookies.filter((entry) => entry.maxAge === 0).length, 2);
+  }
+});
+
+test('Google rejects conflicting provider challenges and identical duplicate browser challenges', async () => {
+  const result = await beginGoogleSignIn(config, null, async () => json({
+    url: 'https://accounts.google.com/o/oauth2/v2/auth?state=provider-state', redirect: false,
+  }, 200, [`${CHALLENGE_COOKIE}=first; Max-Age=600`, `${LEGACY_CHALLENGE_COOKIE}=second; Max-Age=600`]));
+  assert.equal(result.ok, false);
+  assert.equal(result.code, 'GOOGLE_CHALLENGE_UNVERIFIED');
+  assert.deepEqual(result.cookies, []);
+  assert.equal(challengeCookieFromHeader(`${CHALLENGE_COOKIE}=same; ${LEGACY_CHALLENGE_COOKIE}=same`), null);
+});
+
 test('Google callback requires one verifier and one unambiguous challenge before any provider read', async () => {
   assert.equal(challengeCookieFromHeader(`${CHALLENGE_COOKIE}=a; ${LEGACY_CHALLENGE_COOKIE}=b`), null);
   assert.equal(challengeCookieFromHeader(`${CHALLENGE_COOKIE}=a; ${CHALLENGE_COOKIE}=b`), null);
