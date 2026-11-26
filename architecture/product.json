@@ -2,7 +2,7 @@
   "schema_version": 1,
   "application": "Xtreme Avatar",
   "repository": "XTREME-SYSTEMS/xtreme-avatar-clean",
-  "status": "foundation_only",
+  "status": "application_foundation",
   "legacy": {
     "repository": "XTREME-SYSTEMS/xtreme-avatar-platform",
     "policy": "historical_reference_only; current production support until approved cutover; no imported application source, history, dependency manifests or secrets"

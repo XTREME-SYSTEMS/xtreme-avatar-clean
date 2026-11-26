@@ -1,0 +1,149 @@
+{
+  "fileKey": "16F1Pcf7WN23HfBlBBx2Mf",
+  "nodeId": "42:13",
+  "sourceHead": "7c00eea59302526b27367465122851e2db06555a",
+  "assets": {
+    "imgV4CurvedSilverLightReusable": {
+      "src": "/assets/home/1b49e9a351ba77b9.svg",
+      "width": 440.0,
+      "height": 973.0,
+      "sha256": "1b49e9a351ba77b932f73bf88d7d4023836dfe5068b0a4be06726dd758b2a091"
+    },
+    "imgV4BrushedAluminumTextureReusable": {
+      "src": "/assets/home/2b57736c3a5827de.svg",
+      "width": 440.0,
+      "height": 973.0,
+      "sha256": "2b57736c3a5827deef546f70491c8fa96d7cc31fcbcb73f7358bcebf0bea619f"
+    },
+    "imgAtmosphereSilverPearlUpperRight": {
+      "src": "/assets/home/7422be9ea6a3b96e.svg",
+      "width": 545.0,
+      "height": 480.0,
+      "sha256": "7422be9ea6a3b96e161f4f763d4289854790424fb4f580a32800fe98d4f02256"
+    },
+    "imgAtmosphereWhiteGraphiteMiddle": {
+      "src": "/assets/home/d82b1b0a6ca275ad.svg",
+      "width": 660.0,
+      "height": 470.0,
+      "sha256": "d82b1b0a6ca275adc98fb7c3ece340528987988118b03592c54408acb4f3b6eb"
+    },
+    "imgAtmosphereSilverLowerBevel": {
+      "src": "/assets/home/d614dbb6ba044084.svg",
+      "width": 550.0,
+      "height": 390.0,
+      "sha256": "d614dbb6ba0440849e75a42bc4b8cef2e6474f83062520216ddb0ff0886dde54"
+    },
+    "imgBrandXMark": {
+      "src": "/assets/446a7.svg",
+      "width": 58.6667,
+      "height": 58.6667,
+      "sha256": "615ebcabc775df9a2acf8fcaf689e58ee9404f51c002a9b01d6c83012a4e7de2"
+    },
+    "imgIconUser": {
+      "src": "/assets/7a4c4.svg",
+      "width": 28.2051,
+      "height": 28.2051,
+      "sha256": "6d2f6f44bae42ce3ba220b1711f48c1becba15008754df597ccd29b14366923d"
+    },
+    "imgIconMic": {
+      "src": "/assets/home/c54194a64f0b9ff9.svg",
+      "width": 42.8718,
+      "height": 42.8718,
+      "sha256": "c54194a64f0b9ff9307895e8b187c00e12358193c16672a32bd114f0a7a68520"
+    },
+    "imgIconArrow": {
+      "src": "/assets/home/5ef27fe6ba9f1698.svg",
+      "width": 32.7179,
+      "height": 32.7179,
+      "sha256": "5ef27fe6ba9f16985e009d66aa27eda09e753780b54f3ffd8feb9511d1b38528"
+    },
+    "imgIconVideo": {
+      "src": "/assets/home/68e321d9cd054d46.svg",
+      "width": 41.7436,
+      "height": 41.7436,
+      "sha256": "68e321d9cd054d46fb7cc799d545157bcdfa5cab05a74b31e1538aab8726a6c0"
+    },
+    "imgIconMic1": {
+      "src": "/assets/home/20f44001920acc63.svg",
+      "width": 41.7436,
+      "height": 41.7436,
+      "sha256": "20f44001920acc63a0a6c4d29bead12d5465bac3b540d80c9dadc903e08b5165"
+    },
+    "imgIconTasks": {
+      "src": "/assets/home/5acea4fb46b30a6f.svg",
+      "width": 41.7436,
+      "height": 41.7436,
+      "sha256": "5acea4fb46b30a6f56e566f9e999e8dbfe7e1caefb33b85990ff08855588e4e6"
+    },
+    "imgIconCalendar": {
+      "src": "/assets/home/7b57d6b38b269539.svg",
+      "width": 41.7436,
+      "height": 41.7436,
+      "sha256": "7b57d6b38b2695393f215e6452fc316d05df1da66c3218d76a10cfe936a11fef"
+    },
+    "imgIconApproval": {
+      "src": "/assets/home/216cfcd75058b61f.svg",
+      "width": 41.7436,
+      "height": 41.7436,
+      "sha256": "216cfcd75058b61f79a9a158460a1ef8d03370d048d6690e6260ecc90d4f8109"
+    },
+    "imgIconApproval1": {
+      "src": "/assets/home/da9c75dd999353c1.svg",
+      "width": 28.2051,
+      "height": 28.2051,
+      "sha256": "da9c75dd999353c1705e707a1f75b9fcc39bf87492ff504a04886f0aa1b37f00"
+    },
+    "imgIconChev": {
+      "src": "/assets/home/6a47bf858e751b86.svg",
+      "width": 19.1795,
+      "height": 19.1795,
+      "sha256": "6a47bf858e751b861d9424f03516e6f00949565a48b6a24b81cb64c68b9aef90"
+    },
+    "imgIconHome": {
+      "src": "/assets/205c0.svg",
+      "width": 31.5897,
+      "height": 31.5897,
+      "sha256": "17fa98d6443d2f46cdf788ecdd89b63129c7181cd9c85aea51967e835f88795e"
+    },
+    "imgIconLayers": {
+      "src": "/assets/home/cae5ac164b214900.svg",
+      "width": 31.5897,
+      "height": 31.5897,
+      "sha256": "cae5ac164b214900110a2fbb01745347bc124fa4eaf58f1cd2eb818701146b87"
+    },
+    "imgIconCreate": {
+      "src": "/assets/7a79f.svg",
+      "width": 31.5897,
+      "height": 31.5897,
+      "sha256": "bc44cd3637272e7e1939d5d5d10306b7911fc6ee3eb07da961164af41f3f583d"
+    },
+    "imgIconMore": {
+      "src": "/assets/56fad.svg",
+      "width": 31.5897,
+      "height": 31.5897,
+      "sha256": "e069054452a7a9cb1aa14dd2e61ad939b55f70f62b6a588a04beff82dfe003b0"
+    },
+    "imgIconIdeasRadar": {
+      "src": "/assets/home/31d367e36d55e415.svg",
+      "width": 42.0,
+      "height": 42.0,
+      "sha256": "31d367e36d55e4154338781279dba6c3dbe115ff990c86eec0ccd8b7e5d2c095"
+    },
+    "imgIconFinishedResultReceipt": {
+      "src": "/assets/home/54ca3ed42dc67b7f.svg",
+      "width": 29.0,
+      "height": 29.0,
+      "sha256": "54ca3ed42dc67b7fa52931396ad1b00eb6be89e520f99b11ef1f12304d17f796"
+    }
+  },
+  "sharedShellAssetsVerified": [
+    "imgBrandXMark",
+    "imgIconUser",
+    "imgIconHome",
+    "imgIconCreate",
+    "imgIconMore"
+  ],
+  "navigationPolicy": "Home uses approved Home SVGs; other routes retain original icons",
+  "mediaStatus": "not-connected",
+  "finishedRoutePreserved": true
+}
