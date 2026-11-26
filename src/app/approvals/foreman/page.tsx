@@ -38,7 +38,7 @@ export default async function ForemanReviewPage() {
     <header className={styles.heading}>
       <p className={styles.eyebrow}>OWNER REVIEW</p>
       <h1 id="foreman-review-title">Foreman approvals</h1>
-      <p>Review one action at a time before Eden reads, changes, or runs anything.</p>
+      <p>Routine audits run automatically. This is where you review changes that need your approval.</p>
     </header>
 
     {access !== "owner" ? <section className={styles.card} aria-labelledby="access-title">
@@ -54,11 +54,11 @@ export default async function ForemanReviewPage() {
       <section className={styles.card} aria-labelledby="details-title">
         <h2 id="details-title">What you’ll review</h2>
         <dl className={styles.details}>
-          <div><dt>Action</dt><dd>One read, write, or execution request.</dd></div>
+          <div><dt>Action</dt><dd>One protected action, such as a production change or a new access grant.</dd></div>
           <div><dt>Target and revision</dt><dd>The exact system, environment, and version the request applies to.</dd></div>
           <div><dt>Impact</dt><dd>What changes, what it may cost, and when the request expires.</dd></div>
         </dl>
-        <p>Opening an email or this page does not authorize anything.</p>
+        <p>Email can wake an audit, but opening a link does not approve a change.</p>
       </section>
     </>}
   </section>;
