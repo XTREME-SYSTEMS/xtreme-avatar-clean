@@ -110,3 +110,31 @@ Google requires the redirect URI to match the registered value exactly and docum
 | Existing Workspace OAuth client/callback/grants in the clean app | Not verified; app routes require implementation |
 | Gmail/Drive/Contacts execution through the existing gateway | Not verified |
 | Production release | Pending the existing release gates; no release performed by this audit |
+
+## Follow-up: Google, the universal gateway, and live voice
+
+Follow-up evidence: 2026-11-26 UTC. The earlier snapshot remains historical; the following observations supersede its Google-console unknowns without claiming any new provider integration is complete.
+
+### Google sign-in
+
+The authenticated browser can access the architecture-selected Google project. Xtreme Avatar branding and an External / In production audience already exist. The existing Xtreme Avatar Platform client uses the legacy Workspace callback; it is not the managed Neon sign-in client. A separate clean Web-client form has been prepared but not submitted. Neon still uses shared Google credentials, and the existing password account's last Google attempt returned `account_not_linked`. See [the current Google handoff](GOOGLE_INTERNAL_ROLLOUT.md) for exact callbacks, prior branding-review issues, and the account-linking acceptance gates.
+
+Google sign-in and Google Workspace authorization remain separate. Neither the new client form nor a successful social login would establish Gmail, Drive, Contacts, or MCP access.
+
+### Existing universal MCP gateway
+
+The connected gateway reports `eden-universal-gateway-v2`, release `2.3.0`. The inspected configuration contains one remote upstream, DeepWiki, with two allowed tools. A real read-only `read_wiki_structure` request for the public `modelcontextprotocol/typescript-sdk` repository succeeded at `2026-11-26T04:00:03.607Z`, with receipt `4f887fee-3265-4c87-a359-7d36b159e838`, `dispatched: true`, and `outcome: success`.
+
+This is evidence of that one read path. The Google Workspace binding reports `not_bound`, with no configured variable or authenticated/read/write verification. Owner identity assurance remains `github_login_configured_not_independently_verified`; Guardian is pending. A separate gate summary still identifies `2.1.0-source` / `SOURCE_ONLY`, so the differing version/status records do not establish a coherent production certification.
+
+Reuse this gateway for scoped tools after its caller identity and per-operation grants are verified. It does not replace Core's intelligence/memory boundary or Neon's account authority. No Core-to-gateway or Neon-to-Core identity binding was established by the DeepWiki test. The separate EVE hostname is an engineering interface, not evidence that this gateway is hosted there.
+
+### Sol, Gleam, and the app's audio path
+
+Current official OpenAI documentation lists **Sol** as a ChatGPT voice and **`gleam`** as a GPT-Live API voice. No official equivalence between the two was established. Do not label an app voice as Sol or silently substitute another voice. The documented app path is a server-created `gpt-live-1.1` session with `audio.output.voice: "gleam"`, WebRTC transport, and application/client delegation where the existing Core handles work. OpenAI project entitlement and the selected deployed voice remain unverified.
+
+The existing Core adapter already calls `/v1/live/sessions`; it does not need an invented migration from a Realtime endpoint. Its source still reports `delegationConnected: false`, `providerToolExecutionVerified: false`, and `providerPlaybackVerified: false`. Core's Tavus adapter can create a private Echo session but does not forward OpenAI assistant audio into it. Keep those limitations visible until actual delegation, audible playback, interruption, ownership, and cleanup tests pass.
+
+Client delegation requires implementation beyond choosing `delegation.type: "client"`. `session.delegation.created` carries metadata and a delegation ID, not the user's task text. Use the transcript plus scoped application context to invoke the authorized Core operation, and correlate verified results to the original delegation ID. Keep long records in Core; do not treat arbitrary client commentary as an execution receipt.
+
+Official references: [ChatGPT voice](https://help.openai.com/en/articles/20001274-chatgpt-voice), [GPT-Live voice options](https://developers.openai.com/api/docs/guides/live-conversations#voice-options), [Live session creation](https://developers.openai.com/api/reference/resources/live/methods/create), [client delegation](https://developers.openai.com/api/docs/guides/live-delegation), and [Tavus Echo Mode](https://docs.tavus.io/sections/conversational-video-interface/echo-mode).

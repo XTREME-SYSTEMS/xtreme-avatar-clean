@@ -6,6 +6,7 @@ import type { FormEvent } from "react";
 import type { AccountSession } from "@/lib/auth/types";
 import { googleSignInErrorMessage } from "@/lib/auth/google-errors";
 import { accountFocusAction, SIGN_UP_UNCERTAIN_MESSAGE } from "@/lib/auth/account-focus";
+import { GoogleLinkPanel } from "./google-link-panel";
 import styles from "./account-panel.module.css";
 
 const SESSION_CHANGE_KEY = "avatar.auth.revision";
@@ -51,7 +52,7 @@ function actionError(code: unknown, fallback: string): string {
   return fallback;
 }
 
-export function AccountPanel({ configured, googleError = false, googleReturn = false, googleIssue }: { configured: boolean; googleError?: boolean; googleReturn?: boolean; googleIssue?: string }) {
+export function AccountPanel({ configured, googleError = false, googleReturn = false, googleIssue, googleLinkReturn = false, googleLinkIssue }: { configured: boolean; googleError?: boolean; googleReturn?: boolean; googleIssue?: string; googleLinkReturn?: boolean; googleLinkIssue?: string }) {
   const [session, updateSession] = useState<ScreenState>(configured ? { status: "loading" } : { status: "unavailable", code: "AUTH_NOT_CONFIGURED" });
   const sessionRef = useRef<ScreenState>(session);
   const setSession = useCallback((next: ScreenState) => { sessionRef.current = next; updateSession(next); }, []);
@@ -99,8 +100,8 @@ export function AccountPanel({ configured, googleError = false, googleReturn = f
     const refreshRequest = refreshController;
     const actionRequest = actionController;
     tabId.current ||= crypto.randomUUID();
-    if (googleError || googleReturn) window.history.replaceState(window.history.state, "", "/account");
-    if (googleReturn) notifySessionChange(tabId.current);
+    if (googleError || googleReturn || googleLinkReturn) window.history.replaceState(window.history.state, "", "/account");
+    if (googleReturn || googleLinkReturn) notifySessionChange(tabId.current);
     let mounted = true;
     // Cancel the initial fetch if React abandons this mount before its microtask.
     queueMicrotask(() => { if (mounted && configured) void refreshSession(); });
@@ -135,7 +136,7 @@ export function AccountPanel({ configured, googleError = false, googleReturn = f
       window.removeEventListener("storage", onStorage);
       channel?.close();
     };
-  }, [configured, googleError, googleReturn, refreshSession, setPending, setSession]);
+  }, [configured, googleError, googleReturn, googleLinkReturn, refreshSession, setPending, setSession]);
 
   function startAction(kind: NonNullable<typeof pending>) {
     ++generation.current;
@@ -357,12 +358,16 @@ export function AccountPanel({ configured, googleError = false, googleReturn = f
       </form>
     </section>}
 
+    {googleLinkIssue && session.status === "anonymous" && <p className={styles.error} role="alert">Google linking was not confirmed. Sign in, then check your account’s Google connection status.</p>}
+
     {user && <section className={styles.card}>
       <div className={styles.profile}><span className={styles.avatar} aria-hidden="true">{user.name.trim().slice(0, 1).toUpperCase() || "A"}</span><div><h2>{user.name}</h2><p className={styles.email}>{user.email}</p></div></div>
       {session.status === "authenticated" && <p className={styles.status}><span aria-hidden="true" />Signed in · {currentOrganization?.role}</p>}
       {session.status === "membership_required" && <p>{organizations?.length === 0 && !session.organizationListUnavailable ? "Create your first workspace or join an existing one to continue." : "Choose a workspace to continue. Signing in does not automatically grant workspace access."}</p>}
       {session.status === "access_denied" && <p>This account cannot access the selected workspace. Refresh your account or contact the workspace owner.</p>}
     </section>}
+
+    {(session.status === "authenticated" || session.status === "membership_required") && <GoogleLinkPanel account={session} busy={pending !== null} returnIssue={googleLinkIssue} />}
 
     {(session.status === "authenticated" || session.status === "membership_required") && <section className={styles.card}>
       <h2>Your workspace</h2>

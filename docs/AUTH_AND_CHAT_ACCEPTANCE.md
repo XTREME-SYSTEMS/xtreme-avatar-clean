@@ -19,6 +19,26 @@ uses neutral follow-up guidance, including when the provider conceals whether an
 account already exists. Registration does not grant a company workspace or Core
 access. Existing provider email-verification and linking settings are preserved.
 
+The signed-in account page also reads Google connection status through fresh
+managed session/account checks. Explicit Google linking uses a dedicated
+same-origin action and the provider's existing `link-social` contract. The adapter
+pins the original opaque session cookie and rejects substitution, deletion, expiry,
+or ambiguity. Every linked-account row must belong to that same user.
+
+A separate signed, host-only, HttpOnly marker binds the initiating user/session,
+Neon issuer, application origin and attempt for at most 600 seconds. It is only an
+OAuth-flow correlation marker, not an authentication session or local session cache.
+The separate link callback reads the original live session and linked accounts;
+it never exchanges a login verifier, adopts a new cookie, or modifies the provider.
+It sends no Set-Cookie header, so a delayed callback cannot erase a newer attempt.
+The marker expires naturally or is replaced by an explicit new start. Replaying
+the callback can only repeat fresh reads.
+
+Neon performs the account-link write before this application callback. App-side
+rejection cannot prevent or undo that upstream write. Managed-provider conflict
+and revocation-before-return behavior therefore remain required live acceptance
+tests; neither the SDK version nor the public OpenAPI proves that behavior.
+
 A signed-in account with a verified empty workspace list can explicitly create its
 first workspace by entering a display name. The existing Managed Neon organization
 service assigns membership; the app rechecks the initiating user, session, exact
@@ -57,9 +77,10 @@ account-linking condition, not evidence that a new Google client repairs it. The
 owner's subsequent email/password attempt was rejected. Source tests do not
 establish a successful hosted login, registration, or workspace creation.
 
-Jeremy has chosen Neon account access for the immediate rollout and deferred
-Google organization changes. See [the account and Google handoff](GOOGLE_INTERNAL_ROLLOUT.md)
-for the intended `xtremeavatar.com` brand/domain and future organization decisions.
+Jeremy has resumed Google sign-in setup alongside Neon accounts. No organization
+migration is part of this work. See [the account and Google handoff](GOOGLE_INTERNAL_ROLLOUT.md)
+for the intended `xtremeavatar.com` brand/domain, the unsaved new-client form, and
+the current provider-configuration and branding-review limitations.
 
 Required hosted checks after configuration:
 
@@ -68,6 +89,12 @@ Required hosted checks after configuration:
   uncertain response. Do not create production test identities or claim an email
   was verified from an unverified provider field.
 - Sign in, reload, select only a workspace where the user is a member, then sign out.
+- Explicitly link Google from an authenticated account, prove the same Neon user
+  is retained, and verify both the existing sign-in method and subsequent Google
+  login. Confirm no workspace, membership, Core mapping or Core grant changes.
+- Revoke the initiating session before Google's return and verify no new provider
+  account row is written. An app callback error alone does not pass this check.
+  Verify a Google identity already owned by another Neon user is rejected.
 - Verify a revoked session and a foreign user/organization cannot call Core.
 - Verify the approved issuer, audience, client and key policy on the exact Core
   deployment; do not assume a primary metadata issuer lists every accepted issuer.
@@ -88,8 +115,17 @@ assignment remain gated by independent release checks and owner approval. See
 [Vercel's Git deployment configuration](https://vercel.com/docs/project-configuration/git-configuration).
 
 Only `NEON_AUTH_BASE_URL` and the exact `AVATAR_APP_ORIGIN` are needed for the
-account adapter. The auth origin is pinned to the existing verified Avatar branch.
+basic account adapter. The auth origin is pinned to the existing verified Avatar branch.
 The preview host must be trusted by Neon. No new Neon project or branch is created.
+
+Explicit linking additionally requires `AVATAR_AUTH_FLOW_SECRET`: exactly 32
+cryptographically random bytes encoded in canonical, unpadded base64url. It is
+server-only, separate from both Google's client secret and Core's signing key.
+The protected source-review preview keeps it unset. Missing or invalid key
+configuration disables link initiation without breaking account registration,
+ordinary sign-in or read-only connection status. Provision it through secure
+deployment settings only for the controlled hosted acceptance flow; never place
+its value in source, a public environment variable, logs or a PR.
 
 `CORE_CHAT_ENABLED` remains false in the review preview. The other Core variables
 in `.env.example` are deliberately empty. Do not fill them with guessed IDs or copy
@@ -111,3 +147,8 @@ preview. Disabling `CORE_CHAT_ENABLED` stops delegation. There are no applicatio
 schema, historical-memory, production-domain, or existing Core runtime changes in
 this source slice. Revoke any separately granted key and mapping when retiring a
 live binding; deleting frontend code alone does not revoke an issued credential.
+Removing the flow key disables new Google-link starts but does not undo an OAuth
+attempt already held by Neon or unlink an existing Google account. Restoring the
+branch provider from custom credentials to Neon's shared credentials has not been
+established as a supported non-deleting operation; see the Google handoff before
+changing the shared provider configuration.

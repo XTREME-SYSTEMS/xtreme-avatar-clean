@@ -12,7 +12,7 @@ import type { ManagedSessionCookie } from "./http";
  * Revocation: https://www.better-auth.com/docs/concepts/session-management
  */
 export type ProviderResult = { data: unknown; error: null | { status: number; code: string } };
-type Endpoint = "get-session" | "sign-in/email" | "sign-up/email" | "sign-in/social" | "sign-out" |
+type Endpoint = "get-session" | "sign-in/email" | "sign-up/email" | "sign-in/social" | "sign-out" | "list-accounts" | "link-social" |
   "organization/list" | "organization/get-active-member" | "organization/set-active" | "organization/create";
 
 export function isRecord(value: unknown): value is Record<string, unknown> {
@@ -23,6 +23,7 @@ export function createManagedAuthProvider(
   config: AuthConfiguration,
   incomingCookies: string | null,
   fetcher: typeof fetch = fetch,
+  options: { pinSessionCookie?: boolean } = {},
 ) {
   let sessionCookie = sessionCookieFromHeader(incomingCookies);
   const challengeCookie = challengeCookieFromHeader(incomingCookies);
@@ -69,12 +70,25 @@ export function createManagedAuthProvider(
           ? data.code : "AUTH_REQUEST_FAILED";
         return { data: null, error: { status: response.status, code } };
       }
-      for (const value of response.headers.getSetCookie()) {
+      const receivedCookies = response.headers.getSetCookie();
+      if (options.pinSessionCookie && receivedCookies.filter((value) => value.slice(0, value.indexOf("=")).trim() === SESSION_COOKIE).length > 1) {
+        return { data: null, error: { status: 409, code: "AUTH_SESSION_CHANGED" } };
+      }
+      for (const value of receivedCookies) {
         const cookie = managedCookieFromSetCookie(value);
-        if (!cookie) continue;
-        changedCookies.set(cookie.name ?? SESSION_COOKIE, cookie);
+        if (!cookie) {
+          if (options.pinSessionCookie && value.slice(0, value.indexOf("=")).trim() === SESSION_COOKIE) {
+            return { data: null, error: { status: 409, code: "AUTH_SESSION_CHANGED" } };
+          }
+          continue;
+        }
         const expired = (cookie.maxAge !== undefined && cookie.maxAge <= 0) || (cookie.expires && cookie.expires.getTime() <= Date.now());
-        if (cookie.name === SESSION_COOKIE) sessionCookie = cookie.value && !expired ? `${SESSION_COOKIE}=${cookie.value}` : null;
+        if (cookie.name === SESSION_COOKIE) {
+          const next = cookie.value && !expired ? `${SESSION_COOKIE}=${cookie.value}` : null;
+          if (options.pinSessionCookie && next !== sessionCookie) return { data: null, error: { status: 409, code: "AUTH_SESSION_CHANGED" } };
+          if (!options.pinSessionCookie) sessionCookie = next;
+        }
+        changedCookies.set(cookie.name ?? SESSION_COOKIE, cookie);
       }
       return { data, error: null };
     } catch { return { data: null, error: { status: 503, code: "AUTH_UNAVAILABLE" } }; }
@@ -82,6 +96,12 @@ export function createManagedAuthProvider(
 
   return {
     getSession: () => sessionCookie ? request("get-session", "GET") : Promise.resolve({ data: null, error: null }),
+    listAccounts: () => request("list-accounts", "GET"),
+    linkGoogle: (attempt: string) => {
+      const callback = new URL(`${config.appOrigin}/auth/callback/google/link`);
+      callback.searchParams.set("attempt", attempt);
+      return request("link-social", "POST", { provider: "google", disableRedirect: true, callbackURL: callback.toString(), errorCallbackURL: callback.toString() });
+    },
     getActiveMember: () => request("organization/get-active-member", "GET"),
     listOrganizations: () => request("organization/list", "GET"),
     setActiveOrganization: (organizationId: string) => request("organization/set-active", "POST", { organizationId }),

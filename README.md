@@ -36,6 +36,10 @@ parallel local auth server or database credential in this first slice.
   identity service. New accounts do not inherit another user's workspace or Core
   access. Account and workspace access use fresh provider session and membership checks,
   host-only HttpOnly cookies, same-origin mutation checks and honest error states.
+- A signed-in account can read its Google connection status. Explicit linking has
+  a separate callback bound to the original live session; it never adopts a new
+  session or grants Workspace access. Linking stays disabled while the dedicated
+  server-only `AVATAR_AUTH_FLOW_SECRET` is unset. Hosted linking is not yet verified.
 - `/api/eden/chat` is a fixed server adapter for Core chat and chronological history.
   It preserves request identity across retries and validates bounded input/output.
 - Core delegation stays disabled until a specifically approved Neon-to-Core
@@ -49,8 +53,9 @@ parallel local auth server or database credential in this first slice.
 See [auth/chat acceptance](docs/AUTH_AND_CHAT_ACCEPTANCE.md),
 [Core identity requirements](docs/CORE_IDENTITY_BRIDGE_REQUIREMENTS.md), and
 [service readiness](docs/SERVICE_CONNECTION_READINESS.md) for the concrete gates.
-The current rollout keeps Neon accounts and the Xtreme Avatar brand; Google
-organization changes are deferred. See [the account rollout handoff](docs/GOOGLE_INTERNAL_ROLLOUT.md).
+The current rollout keeps Neon accounts and the Xtreme Avatar brand. Google
+sign-in setup has resumed; no Google organization migration is part of this work.
+See [the account rollout handoff](docs/GOOGLE_INTERNAL_ROLLOUT.md).
 
 ## Release
 
