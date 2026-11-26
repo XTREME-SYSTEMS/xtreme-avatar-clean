@@ -28,7 +28,10 @@ export default function WorkPage() {
       </div>
 
       <div className={styles.activity}>
-        <h2>Approvals and evidence</h2>
+        <h2>Your workspace</h2>
+        <Link href="/mobile/tasks">
+          <span>My tasks</span><span className={styles.arrow} aria-hidden="true">→</span>
+        </Link>
         <Link href="/approvals/foreman">
           <span>Review Foreman actions</span><span className={styles.arrow} aria-hidden="true">→</span>
         </Link>
@@ -42,4 +45,5 @@ export default function WorkPage() {
     </section>
   );
 }
+
 
