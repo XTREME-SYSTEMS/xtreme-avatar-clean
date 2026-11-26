@@ -37,3 +37,58 @@
 .composer button { background: var(--metal-gold); }
 .screen a:focus-visible, .screen button:focus-visible, .screen textarea:focus-visible { outline: 2px solid #fff1be; outline-offset: 3px; }
 @media (max-width: 520px) { .heading h1 { font-size: 24px; } .user { margin-left: 14px; } }
+
+.conversationHome {
+  --silver: #c4c1bc;
+  --card-border-color: #494846;
+  --card-surface: #20201f;
+  --card-shadow: none;
+  --metal-silver: #272725;
+  --metal-gold: #eae7e1;
+  color: #f4f1ec;
+  font-size: 1rem;
+  gap: 1.1rem;
+}
+.conversationHome .setup, .conversationHome .empty {
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+}
+.conversationHome .setup p {
+  max-width: 32ch;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  margin: 0 0 1.8rem;
+}
+.conversationHome .setup a, .conversationHome .composer button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 46px;
+  padding: .65rem 1.2rem;
+  border: 1px solid #f0ede7;
+  border-radius: .4rem;
+  background: #f0ede7;
+  color: #151515;
+  font-size: .94rem;
+  font-weight: 650;
+}
+.conversationHome .setup a:hover, .conversationHome .composer button:enabled:hover { background: white; }
+.conversationHome .setup button, .conversationHome .recovery button {
+  background: transparent;
+  border: 0;
+  border-radius: .25rem;
+  color: #cecbc5;
+  padding: .6rem .25rem;
+  min-height: 44px;
+  font-size: .9rem;
+}
+.conversationHome .setup button:hover, .conversationHome .recovery button:hover { text-decoration: underline; }
+.conversationHome .notice { background: #232322; border-color: #a09f9b; }
+.conversationHome .empty h2 { color: #e0dcd6; font-weight: 450; }
+.conversationHome .composer { background: #222221; border-color: #53524f; border-radius: .65rem; }
+.conversationHome .composer label, .conversationHome .turn strong { color: #eeeae3; }
+.conversationHome .composer textarea { color: #f4f1ec; background: #1b1b1a; border-color: #555350; }
+.conversationHome .user, .conversationHome .eden { border-color: #444340; background: #222221; }
+.conversationHome .eden { background: transparent; }

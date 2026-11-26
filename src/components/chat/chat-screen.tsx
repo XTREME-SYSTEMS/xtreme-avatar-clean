@@ -16,7 +16,7 @@ function localStorageIfAvailable(): Storage | null {
   try { return window.localStorage; } catch { return null; }
 }
 
-export function ChatScreen({ mobile = false }: { mobile?: boolean } = {}) {
+export function ChatScreen({ mobile = false, conversationHome = false }: { mobile?: boolean; conversationHome?: boolean } = {}) {
   const [connection, setConnection] = useState<Connection>("loading");
   const [notice, setNotice] = useState("Opening your conversation…");
   const [messages, setMessages] = useState<ChatHistoryTurn[]>([]);
@@ -126,20 +126,25 @@ export function ChatScreen({ mobile = false }: { mobile?: boolean } = {}) {
     } finally { if (activeRequest.current === controller) activeRequest.current = null; sending.current = false; setBusy(false); }
   }
 
-  return <div className={`${styles.screen} phone-screen`}>
-    <Link href={mobile ? "/mobile" : "/"} className={styles.back}>← Home</Link>
-    <header className={styles.heading}><div><h1>Chat with Eden</h1><p>Your conversation, together with your workspace.</p></div><Link href="/account" className={styles.account}>Account</Link></header>
-    <div className={styles.modeLinks}><span aria-current="page">Chat</span><Link href={mobile ? "/mobile/voice" : "/voice"}>Voice</Link><Link href={mobile ? "/mobile/video" : "/video"}>Video</Link></div>
-    {notice && <div className={styles.notice} role="status">{notice}</div>}
+  const needsAccount = connection === "access_denied" || connection === "not_connected";
+  return <div className={conversationHome ? `${styles.screen} ${styles.conversationHome}` : `${styles.screen} phone-screen`}>
+    {!conversationHome && <>
+      <Link href={mobile ? "/mobile" : "/"} className={styles.back}>← Home</Link>
+      <header className={styles.heading}><div><h1>Chat with Eden</h1><p>Your conversation, together with your workspace.</p></div><Link href="/account" className={styles.account}>Account</Link></header>
+      <div className={styles.modeLinks}><span aria-current="page">Chat</span><Link href={mobile ? "/mobile/voice" : "/voice"}>Voice</Link><Link href={mobile ? "/mobile/video" : "/video"}>Video</Link></div>
+    </>}
+    {notice && !(conversationHome && (needsAccount || connection === "loading")) && <div className={styles.notice} role="status">{notice}</div>}
     {connection === "loading" && <p className={styles.empty}>Checking your sign-in and workspace…</p>}
-    {(connection === "access_denied" || connection === "not_connected") && <section className={styles.setup}>
-      <h2>{connection === "access_denied" ? "Open your account" : "Your Eden connection"}</h2>
-      <p>Your conversation will appear after your account and workspace have access.</p>
-      <div><Link href="/account">Account &amp; workspace</Link><button onClick={() => void load()} type="button">Check again</button></div>
+    {needsAccount && <section className={styles.setup}>
+      {conversationHome ? <p role="status">{notice}</p> : <>
+        <h2>{connection === "access_denied" ? "Open your account" : "Your Eden connection"}</h2>
+        <p>Your conversation will appear after your account and workspace have access.</p>
+      </>}
+      <div><Link href="/account">{conversationHome ? "Open your account" : "Account & workspace"}</Link><button onClick={() => void load()} type="button">Check again</button></div>
     </section>}
     {connection === "ready" && <>
       <section className={styles.history} aria-label="Conversation history" aria-live="polite">
-        {!messages.length && <div className={styles.empty}><h2>What would you like to work on?</h2><p>Send your first message to Eden.</p></div>}
+        {!messages.length && <div className={styles.empty}><h2>What would you like to work on?</h2>{!conversationHome && <p>Send your first message to Eden.</p>}</div>}
         {messages.map(turn => <Turn key={turn.id} turn={turn} />)}
       </section>
       {pending && <section className={styles.recovery} aria-label="Pending message recovery"><p><strong>Message awaiting confirmation</strong></p><p>{pending.text}</p><small>The original message and request key are retained on this device for up to 24 hours. Signing out clears them.</small><button type="button" disabled={busy} onClick={() => void send(pending)}>{busy ? "Checking…" : "Check this request"}</button></section>}
