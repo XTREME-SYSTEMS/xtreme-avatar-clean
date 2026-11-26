@@ -83,3 +83,18 @@
   .main:has(form, article) .portrait { display: none; }
   .conversation:has(form, article) { align-self: stretch; }
 }
+.handoff p { margin: 0 0 1.7rem; color: #cbc7c0; font-size: 1.05rem; line-height: 1.6; }
+.handoff a {
+  display: inline-flex;
+  align-items: center;
+  gap: 1.6rem;
+  padding: .75rem 1.15rem;
+  min-height: 46px;
+  background: #f0ede7;
+  color: #151515;
+  border-radius: .4rem;
+  font-weight: 650;
+  font-size: .95rem;
+}
+.handoff a:hover { background: white; }
+.handoff a span { font-size: 1.1rem; }
