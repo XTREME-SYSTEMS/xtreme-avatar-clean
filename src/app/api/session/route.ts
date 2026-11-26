@@ -2,6 +2,7 @@ import { readAuthConfiguration } from "@/lib/auth/config";
 import { readAccount, selectOrganization } from "@/lib/auth/account-service";
 import { createManagedAuthProvider, isRecord } from "@/lib/auth/provider";
 import { isSameOriginMutation, privateJson, readBoundedJson } from "@/lib/auth/http";
+import { createFirstWorkspace } from "@/lib/auth/workspace-onboarding";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -21,6 +22,11 @@ export async function POST(request: Request) {
   if (!isSameOriginMutation(request, config.value.appOrigin)) return privateJson({ status: "access_denied", code: "ORIGIN_NOT_ALLOWED" }, 403);
   const body = await readBoundedJson(request, 1024);
   if (!body.ok) return privateJson({ status: "access_denied", code: body.code }, body.status);
+  if (isRecord(body.data) && body.data.action === "createOrganization") {
+    const provider = createManagedAuthProvider(config.value, request.headers.get("cookie"));
+    const result = await createFirstWorkspace(provider, config.value.baseUrl, body.data);
+    return privateJson(result.session, result.httpStatus, result.cookies);
+  }
   if (!isRecord(body.data) || body.data.action !== "selectOrganization" || typeof body.data.organizationId !== "string" ||
     !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(body.data.organizationId)) {
     return privateJson({ status: "access_denied", code: "INVALID_ORGANIZATION" }, 400);

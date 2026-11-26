@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import type { AccountSession } from "@/lib/auth/types";
+import { googleSignInErrorMessage } from "@/lib/auth/google-errors";
 import styles from "./account-panel.module.css";
 
 const SESSION_CHANGE_KEY = "avatar.auth.revision";
@@ -42,11 +43,11 @@ function actionError(code: unknown, fallback: string): string {
   return fallback;
 }
 
-export function AccountPanel({ configured, googleError = false, googleReturn = false }: { configured: boolean; googleError?: boolean; googleReturn?: boolean }) {
+export function AccountPanel({ configured, googleError = false, googleReturn = false, googleIssue }: { configured: boolean; googleError?: boolean; googleReturn?: boolean; googleIssue?: string }) {
   const [session, setSession] = useState<ScreenState>(configured ? { status: "loading" } : { status: "unavailable", code: "AUTH_NOT_CONFIGURED" });
-  const [pending, setPending] = useState<"sign-in" | "google" | "sign-out" | "organization" | null>(null);
+  const [pending, setPending] = useState<"sign-in" | "google" | "sign-out" | "organization" | "create-organization" | null>(null);
   const [notice, setNotice] = useState("");
-  const [error, setError] = useState(googleError ? "Google sign-in could not be completed. Please try again." : "");
+  const [error, setError] = useState(googleError ? googleSignInErrorMessage(googleIssue) : "");
   const [organizationId, setOrganizationId] = useState("");
   const generation = useRef(0);
   const refreshController = useRef<AbortController | null>(null);
@@ -210,6 +211,43 @@ export function AccountPanel({ configured, googleError = false, googleReturn = f
     finally { if (epoch === authEpoch.current) setPending(null); }
   }
 
+  async function createWorkspace(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (pending) return;
+    const form = event.currentTarget;
+    const name = new FormData(form).get("name");
+    const { epoch, controller } = startAction("create-organization");
+    try {
+      const response = await fetch("/api/session", {
+        method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "createOrganization", name }), signal: controller.signal,
+      });
+      const result: unknown = await response.json();
+      if (epoch !== authEpoch.current) return;
+      notifySessionChange(tabId.current);
+      if (!response.ok || !isAccountSession(result) || result.status !== "authenticated" || !result.workspaceCreation) {
+        const code = isAccountSession(result) ? result.code : undefined;
+        if (code === "INVALID_WORKSPACE_NAME") setError("Enter a workspace name using 1–80 characters.");
+        else if (code === "FIRST_WORKSPACE_ALREADY_EXISTS") setNotice("A workspace is already available. Choose it below.");
+        else if (code === "WORKSPACE_CREATE_DENIED") setError("Your account cannot create a workspace. Ask an existing workspace owner to add you.");
+        else if (code === "WORKSPACE_RATE_LIMITED") setError("There have been too many attempts. Wait a moment, then refresh your account.");
+        else setError("We could not confirm the workspace setup. Refresh your account before trying again.");
+        await refreshSession();
+        return;
+      }
+      form.reset();
+      setSession(result);
+      setOrganizationId(result.organization?.id ?? "");
+      setNotice(result.workspaceCreation === "created" ? "Your workspace has been created." : "Your existing workspace is open.");
+    } catch {
+      if (epoch === authEpoch.current) {
+        notifySessionChange(tabId.current);
+        setError("We could not confirm whether your workspace was created. Refresh your account before trying again.");
+        await refreshSession();
+      }
+    } finally { if (epoch === authEpoch.current) setPending(null); }
+  }
+
   const user = "user" in session ? session.user : undefined;
   const organizations = "organizations" in session ? session.organizations : undefined;
   const currentOrganization = "organization" in session ? session.organization : undefined;
@@ -239,7 +277,7 @@ export function AccountPanel({ configured, googleError = false, googleReturn = f
     {user && <section className={styles.card}>
       <div className={styles.profile}><span className={styles.avatar} aria-hidden="true">{user.name.trim().slice(0, 1).toUpperCase() || "A"}</span><div><h2>{user.name}</h2><p className={styles.email}>{user.email}</p></div></div>
       {session.status === "authenticated" && <p className={styles.status}><span aria-hidden="true" />Signed in · {currentOrganization?.role}</p>}
-      {session.status === "membership_required" && <p>Choose a workspace to continue. Signing in does not automatically grant workspace access.</p>}
+      {session.status === "membership_required" && <p>{organizations?.length === 0 && !session.organizationListUnavailable ? "Create your first workspace or join an existing one to continue." : "Choose a workspace to continue. Signing in does not automatically grant workspace access."}</p>}
       {session.status === "access_denied" && <p>This account cannot access the selected workspace. Refresh your account or contact the workspace owner.</p>}
     </section>}
 
@@ -251,7 +289,14 @@ export function AccountPanel({ configured, googleError = false, googleReturn = f
           {organizations.map((organization) => <option key={organization.id} value={organization.id}>{organization.name}</option>)}
         </select></label>
         <button className={styles.secondary} type="submit" disabled={!organizationId || pending !== null || organizationId === currentOrganization?.id}>{pending === "organization" ? "Opening workspace…" : "Use this workspace"}</button>
-      </form> : <p>{session.organizationListUnavailable ? "We could not load your workspaces. Refresh your account to try again." : "No workspace is assigned to this account yet. An existing workspace owner can invite you."}</p>}
+      </form> : session.status === "membership_required" && organizations?.length === 0 && !session.organizationListUnavailable ? <>
+        <p>Give your workspace a name. You will own this new workspace. Your Eden connection will be checked separately.</p>
+        <form className={styles.form} onSubmit={createWorkspace} aria-busy={pending === "create-organization"}>
+          <label htmlFor="account-workspace-name">Workspace name<input id="account-workspace-name" name="name" type="text" autoComplete="organization" required maxLength={80} placeholder="My workspace" disabled={pending !== null} /></label>
+          <button className={styles.primary} type="submit" disabled={pending !== null}>{pending === "create-organization" ? "Creating workspace…" : "Create workspace"}</button>
+        </form>
+        <p>To join an existing workspace, ask its owner to add you.</p>
+      </> : <p>{session.organizationListUnavailable ? "We could not load your workspaces. Refresh your account to try again." : "No workspace is assigned to this account yet. An existing workspace owner can invite you."}</p>}
     </section>}
 
     <div aria-live="polite" aria-atomic="true">{notice && <p className={styles.notice}>{notice}</p>}</div>

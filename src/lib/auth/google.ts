@@ -59,7 +59,18 @@ export async function completeGoogleSignIn(
 ): Promise<GoogleResult> {
   const fail = (code: string): GoogleResult => ({ ok: false, code, cookies: clearChallengeCookies() });
   const verifiers = callbackUrl.searchParams.getAll("neon_auth_session_verifier");
-  if (callbackUrl.origin !== config.appOrigin || verifiers.length !== 1) return fail("GOOGLE_CALLBACK_INVALID");
+  if (callbackUrl.origin !== config.appOrigin) return fail("GOOGLE_CALLBACK_INVALID");
+  const errors = callbackUrl.searchParams.getAll("error");
+  if (errors.length) {
+    if (errors.length !== 1 || verifiers.length) return fail("GOOGLE_CALLBACK_INVALID");
+    // Provider error descriptions may contain account details. Only fixed safe
+    // classifications cross into the app; they never create or link an account.
+    if (errors[0] === "account_not_linked") return fail("GOOGLE_ACCOUNT_LINK_REQUIRED");
+    if (errors[0] === "email_not_verified") return fail("GOOGLE_EMAIL_VERIFICATION_REQUIRED");
+    if (errors[0] === "access_denied") return fail("GOOGLE_ACCESS_DENIED");
+    return fail("GOOGLE_PROVIDER_REJECTED");
+  }
+  if (verifiers.length !== 1) return fail("GOOGLE_CALLBACK_INVALID");
   const verifier = verifiers[0];
   // These are defensive app limits; Neon documents the verifier as opaque.
   if (!verifier || new TextEncoder().encode(verifier).byteLength > 4096 || /[\u0000-\u0020\u007f]/.test(verifier) ||

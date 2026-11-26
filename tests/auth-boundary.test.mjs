@@ -6,6 +6,7 @@ import { createManagedAuthProvider } from '../src/lib/auth/provider.ts';
 import { resolveIdentity } from '../src/lib/auth/identity.ts';
 import { readAccount, selectOrganization, performAuthAction } from '../src/lib/auth/account-service.ts';
 import { beginGoogleSignIn, completeGoogleSignIn } from '../src/lib/auth/google.ts';
+import { googleSignInErrorMessage } from '../src/lib/auth/google-errors.ts';
 
 const config = { baseUrl: AVATAR_NEON_AUTH_BASE_URL, appOrigin: 'https://avatar-clean.example.test' };
 const ids = {
@@ -244,6 +245,40 @@ test('Google rejects conflicting provider challenges and identical duplicate bro
   assert.equal(result.code, 'GOOGLE_CHALLENGE_UNVERIFIED');
   assert.deepEqual(result.cookies, []);
   assert.equal(challengeCookieFromHeader(`${CHALLENGE_COOKIE}=same; ${LEGACY_CHALLENGE_COOKIE}=same`), null);
+});
+
+test('Google provider errors become fixed account guidance without reading a session or exposing descriptions', async () => {
+  let calls = 0;
+  const fetcher = async () => { calls++; throw new Error('Must not run'); };
+  for (const [providerCode, expected] of [
+    ['account_not_linked', 'GOOGLE_ACCOUNT_LINK_REQUIRED'],
+    ['email_not_verified', 'GOOGLE_EMAIL_VERIFICATION_REQUIRED'],
+    ['access_denied', 'GOOGLE_ACCESS_DENIED'],
+    ['arbitrary-account@example.test', 'GOOGLE_PROVIDER_REJECTED'],
+  ]) {
+    const url = new URL(`${config.appOrigin}/auth/callback/google`);
+    url.searchParams.set('error', providerCode);
+    url.searchParams.set('error_description', 'sensitive-provider-detail');
+    const result = await completeGoogleSignIn(config, url, null, fetcher);
+    assert.equal(result.ok, false); assert.equal(result.code, expected);
+    assert.equal(result.cookies.length, 2);
+    assert.ok(result.cookies.every((entry) => entry.maxAge === 0));
+    assert.ok(!JSON.stringify(result).includes('sensitive-provider-detail'));
+    assert.ok(!JSON.stringify(result).includes('account@example.test'));
+  }
+  for (const query of ['?error=account_not_linked&error=access_denied', '?error=account_not_linked&neon_auth_session_verifier=v']) {
+    const result = await completeGoogleSignIn(config, new URL(`${config.appOrigin}/auth/callback/google${query}`), null, fetcher);
+    assert.equal(result.code, 'GOOGLE_CALLBACK_INVALID');
+  }
+  assert.equal(calls, 0);
+});
+
+test('Google account guidance does not interpolate untrusted error codes', () => {
+  assert.match(googleSignInErrorMessage('GOOGLE_ACCOUNT_LINK_REQUIRED'), /email and password/);
+  assert.match(googleSignInErrorMessage('GOOGLE_EMAIL_VERIFICATION_REQUIRED'), /verification/);
+  assert.match(googleSignInErrorMessage('GOOGLE_ACCESS_DENIED'), /not approved/);
+  assert.match(googleSignInErrorMessage('GOOGLE_CHALLENGE_MISSING'), /expired/);
+  assert.ok(!googleSignInErrorMessage('<script>private-provider-detail</script>').includes('private-provider-detail'));
 });
 
 test('Google callback requires one verifier and one unambiguous challenge before any provider read', async () => {

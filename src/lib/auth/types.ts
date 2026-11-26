@@ -28,6 +28,7 @@ export type AccountSession = {
   organization?: { id: string; role: MemberRole };
   organizations?: OrganizationChoice[];
   organizationListUnavailable?: boolean;
+  workspaceCreation?: "created" | "recovered";
 };
 
 export type AuthResolution = VerifiedIdentityResult & { user?: AccountUser };

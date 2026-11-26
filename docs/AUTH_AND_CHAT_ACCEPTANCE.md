@@ -9,6 +9,16 @@ second identity server, use a local JWT session cache, or connect to Core's data
 Every protected chat request checks the current provider session and organization
 membership. A browser-provided subject, role, email or tenant cannot grant access.
 
+A signed-in account with a verified empty workspace list can explicitly create its
+first workspace by entering a display name. The existing Managed Neon organization
+service assigns membership; the app rechecks the initiating user, session, exact
+organization, and owner membership before reporting success. A stable server-derived
+slug and the existing provider uniqueness constraint protect retries and concurrent
+tabs. An uncertain creation is recovered by reading the same workspace, without
+automatically repeating the create request. Existing memberships keep their selector.
+This action creates no Core tenant, identity binding, permission grant, or historical
+memory mapping. See [Neon's organization contract](https://neon.com/docs/auth/guides/plugins/organization).
+
 The Core adapter implements the currently served `/v1/chat` POST and GET contract.
 It only contacts the verified staging origin and validates bounded JSON in both
 directions. A scoped server delegation can be minted only when an explicitly
@@ -29,6 +39,12 @@ pending local text; it is not a second shared memory store.
 auth/Core tests. Tests use synthetic sessions/keys/responses; they do not prove a
 real provider grant, a generated response, avatar playback, or production readiness.
 The new CI job also builds the exact source without provider secrets.
+
+At baseline `8b35cb8`, hosted Google sign-in reached account selection and basic
+sign-in consent, then returned without a verified application session. The precise
+provider rejection remains unverified. This revision adds fixed failure guidance
+and allowlisted code-only callback diagnostics. A new hosted callback receipt is
+required; source tests do not establish successful Google sign-in.
 
 Required hosted checks after configuration:
 

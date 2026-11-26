@@ -5,7 +5,7 @@ import { readAuthConfiguration } from "@/lib/auth/config";
 export const metadata: Metadata = { title: "Your account | Xtreme Avatar" };
 export const dynamic = "force-dynamic";
 
-export default async function AccountPage({ searchParams }: { searchParams: Promise<{ auth_error?: string; auth_return?: string }> }) {
+export default async function AccountPage({ searchParams }: { searchParams: Promise<{ auth_error?: string; auth_return?: string; auth_issue?: string }> }) {
   const query = await searchParams;
-  return <AccountPanel configured={readAuthConfiguration().configured} googleError={query.auth_error === "google"} googleReturn={query.auth_return === "google"} />;
+  return <AccountPanel configured={readAuthConfiguration().configured} googleError={query.auth_error === "google"} googleIssue={query.auth_issue} googleReturn={query.auth_return === "google"} />;
 }
