@@ -32,7 +32,9 @@ parallel local auth server or database credential in this first slice.
 - The approved phone interface and navigation are implemented, with original asset
   provenance in `docs/PHONE_SCREEN_PROVENANCE.json`. Mock counts and the Demo data
   badge were removed in the preceding phone-restoration change.
-- Account and workspace access use fresh provider session and membership checks,
+- Create account, sign-in and workspace access use the existing managed Neon
+  identity service. New accounts do not inherit another user's workspace or Core
+  access. Account and workspace access use fresh provider session and membership checks,
   host-only HttpOnly cookies, same-origin mutation checks and honest error states.
 - `/api/eden/chat` is a fixed server adapter for Core chat and chronological history.
   It preserves request identity across retries and validates bounded input/output.
@@ -47,6 +49,8 @@ parallel local auth server or database credential in this first slice.
 See [auth/chat acceptance](docs/AUTH_AND_CHAT_ACCEPTANCE.md),
 [Core identity requirements](docs/CORE_IDENTITY_BRIDGE_REQUIREMENTS.md), and
 [service readiness](docs/SERVICE_CONNECTION_READINESS.md) for the concrete gates.
+The current rollout keeps Neon accounts and the Xtreme Avatar brand; Google
+organization changes are deferred. See [the account rollout handoff](docs/GOOGLE_INTERNAL_ROLLOUT.md).
 
 ## Release
 

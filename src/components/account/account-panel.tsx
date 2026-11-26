@@ -5,11 +5,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import type { AccountSession } from "@/lib/auth/types";
 import { googleSignInErrorMessage } from "@/lib/auth/google-errors";
+import { accountFocusAction, SIGN_UP_UNCERTAIN_MESSAGE } from "@/lib/auth/account-focus";
 import styles from "./account-panel.module.css";
 
 const SESSION_CHANGE_KEY = "avatar.auth.revision";
 const PENDING_CHAT_PREFIX = "avatar.pending-chat.v1.";
 type ScreenState = AccountSession | { status: "loading" };
+type PendingAction = "sign-in" | "sign-up" | "google" | "sign-out" | "organization" | "create-organization" | null;
 
 function notifySessionChange(sender: string) {
   window.dispatchEvent(new CustomEvent("avatar:session-change", { detail: { source: "account" } }));
@@ -36,6 +38,12 @@ function isAccountSession(value: unknown): value is AccountSession {
 function actionError(code: unknown, fallback: string): string {
   if (code === "INVALID_CREDENTIALS") return "That email and password did not match. Please try again.";
   if (code === "INVALID_CREDENTIAL_INPUT") return "Enter your email and password to sign in.";
+  if (code === "INVALID_REGISTRATION_INPUT") return "Enter your name, a valid email address, and a password with 8–128 characters.";
+  if (code === "SIGN_UP_NOT_COMPLETED") return "We could not complete account setup. If you already have an account with this email, sign in with your existing password or Google account.";
+  if (code === "SIGN_UP_NOT_ALLOWED") return "Account creation is not available right now. You can still sign in to an existing account.";
+  if (code === "ALREADY_SIGNED_IN") return "You are already signed in. Sign out before creating another account.";
+  if (code === "SIGN_UP_SESSION_UNVERIFIED") return "We could not confirm your current session. Refresh your account before creating another account.";
+  if (code === "SIGN_UP_UNVERIFIED") return SIGN_UP_UNCERTAIN_MESSAGE;
   if (code === "TOO_MANY_ATTEMPTS") return "There have been too many attempts. Wait a moment before trying again.";
   if (code === "ORIGIN_NOT_ALLOWED" || code === "AUTH_NOT_CONFIGURED" || code === "AUTH_CONFIGURATION_INVALID") {
     return "Sign-in is not ready for this preview yet. Please check again shortly.";
@@ -44,8 +52,14 @@ function actionError(code: unknown, fallback: string): string {
 }
 
 export function AccountPanel({ configured, googleError = false, googleReturn = false, googleIssue }: { configured: boolean; googleError?: boolean; googleReturn?: boolean; googleIssue?: string }) {
-  const [session, setSession] = useState<ScreenState>(configured ? { status: "loading" } : { status: "unavailable", code: "AUTH_NOT_CONFIGURED" });
-  const [pending, setPending] = useState<"sign-in" | "google" | "sign-out" | "organization" | "create-organization" | null>(null);
+  const [session, updateSession] = useState<ScreenState>(configured ? { status: "loading" } : { status: "unavailable", code: "AUTH_NOT_CONFIGURED" });
+  const sessionRef = useRef<ScreenState>(session);
+  const setSession = useCallback((next: ScreenState) => { sessionRef.current = next; updateSession(next); }, []);
+  const [pending, updatePending] = useState<PendingAction>(null);
+  const pendingRef = useRef<PendingAction>(null);
+  const setPending = useCallback((next: PendingAction) => { pendingRef.current = next; updatePending(next); }, []);
+  const [authMode, setAuthMode] = useState<"sign-in" | "sign-up">("sign-in");
+  const [email, setEmail] = useState("");
   const [notice, setNotice] = useState("");
   const [error, setError] = useState(googleError ? googleSignInErrorMessage(googleIssue) : "");
   const [organizationId, setOrganizationId] = useState("");
@@ -55,7 +69,7 @@ export function AccountPanel({ configured, googleError = false, googleReturn = f
   const authEpoch = useRef(0);
   const tabId = useRef("");
 
-  const refreshSession = useCallback(async () => {
+  const refreshSession = useCallback(async (preserveAnonymousDraft = false) => {
     const current = ++generation.current;
     refreshController.current?.abort();
     const controller = new AbortController();
@@ -65,14 +79,20 @@ export function AccountPanel({ configured, googleError = false, googleReturn = f
       const result: unknown = await response.json();
       if (current !== generation.current) return;
       if (!isAccountSession(result)) throw new Error("Invalid session response");
+      if (preserveAnonymousDraft && sessionRef.current.status === "anonymous" && result.status === "unavailable") {
+        setError("We could not refresh your session. Your form is still here; check your connection before continuing.");
+        return;
+      }
       setSession(result);
       setOrganizationId(result.organization?.id ?? "");
     } catch {
       if (current === generation.current && !controller.signal.aborted) {
-        setSession({ status: "unavailable", code: "AUTH_UNAVAILABLE" });
+        if (preserveAnonymousDraft && sessionRef.current.status === "anonymous") {
+          setError("We could not refresh your session. Your form is still here; check your connection before continuing.");
+        } else setSession({ status: "unavailable", code: "AUTH_UNAVAILABLE" });
       }
     }
-  }, []);
+  }, [setSession]);
 
   useEffect(() => {
     const refreshVersion = generation;
@@ -84,14 +104,20 @@ export function AccountPanel({ configured, googleError = false, googleReturn = f
     let mounted = true;
     // Cancel the initial fetch if React abandons this mount before its microtask.
     queueMicrotask(() => { if (mounted && configured) void refreshSession(); });
-    const invalidateAccount = () => {
+    const invalidateAccount = (interruptedSignup = false) => {
       ++authEpoch.current;
       actionController.current?.abort();
-      setSession({ status: "loading" }); setOrganizationId(""); setNotice(""); setError(""); setPending(null);
+      setSession({ status: "loading" }); setOrganizationId(""); setNotice(""); setPending(null);
+      setError(interruptedSignup ? SIGN_UP_UNCERTAIN_MESSAGE : "");
+      if (!interruptedSignup) setEmail("");
+      setAuthMode("sign-in");
       void refreshSession();
     };
     const onFocus = () => {
-      if (document.visibilityState === "visible") invalidateAccount();
+      if (document.visibilityState !== "visible") return;
+      const action = accountFocusAction(sessionRef.current.status, pendingRef.current);
+      if (action === "refresh-draft") void refreshSession(true);
+      else invalidateAccount(action === "interrupt-signup");
     };
     const onStorage = (event: StorageEvent) => { if (event.key === SESSION_CHANGE_KEY) invalidateAccount(); };
     const channel = typeof BroadcastChannel !== "undefined" ? new BroadcastChannel("avatar.auth") : null;
@@ -109,7 +135,7 @@ export function AccountPanel({ configured, googleError = false, googleReturn = f
       window.removeEventListener("storage", onStorage);
       channel?.close();
     };
-  }, [configured, googleError, googleReturn, refreshSession]);
+  }, [configured, googleError, googleReturn, refreshSession, setPending, setSession]);
 
   function startAction(kind: NonNullable<typeof pending>) {
     ++generation.current;
@@ -140,10 +166,57 @@ export function AccountPanel({ configured, googleError = false, googleReturn = f
         return;
       }
       form.reset();
+      setEmail("");
       notifySessionChange(tabId.current);
       await refreshSession();
     } catch { if (epoch === authEpoch.current) setError("We could not reach sign-in. Check your connection and try again."); }
     finally { if (epoch === authEpoch.current) setPending(null); }
+  }
+
+  async function signUp(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (pending) return;
+    const form = event.currentTarget;
+    const data = new FormData(form);
+    if (data.get("password") !== data.get("confirmPassword")) {
+      setError("Your passwords do not match. Enter the same password in both fields.");
+      return;
+    }
+    const submittedEmail = String(data.get("email") ?? "").trim();
+    const { epoch, controller } = startAction("sign-up");
+    try {
+      const response = await fetch("/api/auth/sign-up/email", {
+        method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: data.get("name"), email: submittedEmail, password: data.get("password") }),
+        signal: controller.signal,
+      });
+      const result = await response.json() as { ok?: boolean; code?: string; outcome?: string };
+      if (epoch !== authEpoch.current || controller.signal.aborted) return;
+      if (!response.ok || result.ok !== true) {
+        setError(actionError(result.code, "We could not confirm whether account setup finished. Try signing in before creating another account."));
+        if (result.code !== "INVALID_REGISTRATION_INPUT" && result.code !== "TOO_MANY_ATTEMPTS") {
+          form.reset(); setAuthMode("sign-in"); setEmail(submittedEmail);
+          notifySessionChange(tabId.current);
+          await refreshSession();
+        }
+        return;
+      }
+      if (result.outcome !== "signed_in" && result.outcome !== "follow_up") throw new Error("Unverified account response");
+      form.reset(); setAuthMode("sign-in");
+      setEmail(result.outcome === "signed_in" ? "" : submittedEmail);
+      if (result.outcome === "follow_up") {
+        setNotice("You are not signed in yet. Try signing in with this email and password, or follow any verification email you receive.");
+      }
+      notifySessionChange(tabId.current);
+      await refreshSession();
+    } catch {
+      if (epoch === authEpoch.current && !controller.signal.aborted) {
+        form.reset(); setAuthMode("sign-in"); setEmail(submittedEmail);
+        setError(SIGN_UP_UNCERTAIN_MESSAGE);
+        notifySessionChange(tabId.current);
+        await refreshSession();
+      }
+    } finally { if (epoch === authEpoch.current && !controller.signal.aborted) setPending(null); }
   }
 
   async function signInGoogle() {
@@ -254,7 +327,7 @@ export function AccountPanel({ configured, googleError = false, googleReturn = f
   const needsSetup = session.status === "unavailable" && ["AUTH_NOT_CONFIGURED", "AUTH_CONFIGURATION_INVALID", "AUTH_ORIGIN_MISMATCH"].includes(session.code ?? "");
 
   return <div className={styles.account}>
-    <header className={styles.heading}><span className={styles.eyebrow}>XTREME AVATAR</span><h1>Your account</h1><p>Sign in to keep your conversations and work in the right workspace.</p></header>
+    <header className={styles.heading}><span className={styles.eyebrow}>XTREME AVATAR</span><h1>Your account</h1><p>Sign in or create an account to keep your conversations and work in the right workspace.</p></header>
 
     {session.status === "loading" && <section className={styles.card} aria-live="polite"><p>Restoring your session…</p></section>}
     {session.status === "unavailable" && <section className={styles.card}>
@@ -264,13 +337,23 @@ export function AccountPanel({ configured, googleError = false, googleReturn = f
     </section>}
 
     {session.status === "anonymous" && <section className={styles.card}>
-      <h2>Welcome back</h2><p>Use your Xtreme Avatar account to sign in.</p>
+      <div className={styles.authModes} role="group" aria-label="Account access">
+        <button type="button" aria-pressed={authMode === "sign-in"} disabled={pending !== null} onClick={() => { setAuthMode("sign-in"); setNotice(""); setError(""); }}>Sign in</button>
+        <button type="button" aria-pressed={authMode === "sign-up"} disabled={pending !== null} onClick={() => { setAuthMode("sign-up"); setNotice(""); setError(""); }}>Create account</button>
+      </div>
+      <h2>{authMode === "sign-up" ? "Create your account" : "Welcome back"}</h2>
+      <p>{authMode === "sign-up" ? "Use your own email and password. You can choose or create a workspace after signing in." : "Use your Xtreme Avatar account to sign in."}</p>
       <button className={`${styles.secondary} ${styles.google}`} type="button" disabled={pending !== null} onClick={() => void signInGoogle()}>{pending === "google" ? "Opening Google…" : "Continue with Google"}</button>
       <div className={styles.divider}><span>or use your email</span></div>
-      <form className={styles.form} onSubmit={signIn} aria-busy={pending === "sign-in"}>
-        <label htmlFor="account-email">Email address<input id="account-email" name="email" type="email" autoComplete="username" required maxLength={320} disabled={pending !== null} /></label>
-        <label htmlFor="account-password">Password<input id="account-password" name="password" type="password" autoComplete="current-password" required maxLength={1024} disabled={pending !== null} /></label>
-        <button className={styles.primary} type="submit" disabled={pending !== null}>{pending === "sign-in" ? "Signing in…" : "Sign in"}</button>
+      <form key={authMode} className={styles.form} onSubmit={authMode === "sign-up" ? signUp : signIn} aria-busy={pending === "sign-in" || pending === "sign-up"}>
+        {authMode === "sign-up" && <label htmlFor="account-name">Your name<input id="account-name" name="name" type="text" autoComplete="name" required maxLength={80} disabled={pending !== null} /></label>}
+        <label htmlFor="account-email">Email address<input id="account-email" name="email" type="email" autoComplete="username" value={email} onChange={(event) => setEmail(event.target.value)} required maxLength={320} disabled={pending !== null} /></label>
+        <label htmlFor="account-password">Password<input id="account-password" name="password" type="password" autoComplete={authMode === "sign-up" ? "new-password" : "current-password"} required minLength={authMode === "sign-up" ? 8 : undefined} maxLength={authMode === "sign-up" ? 128 : 1024} aria-describedby={authMode === "sign-up" ? "account-password-hint" : undefined} disabled={pending !== null} /></label>
+        {authMode === "sign-up" && <>
+          <p id="account-password-hint" className={styles.hint}>Use 8–128 characters. A longer, unique password helps protect your account.</p>
+          <label htmlFor="account-confirm-password">Confirm password<input id="account-confirm-password" name="confirmPassword" type="password" autoComplete="new-password" required minLength={8} maxLength={128} disabled={pending !== null} /></label>
+        </>}
+        <button className={styles.primary} type="submit" disabled={pending !== null}>{authMode === "sign-up" ? pending === "sign-up" ? "Creating account…" : "Create account" : pending === "sign-in" ? "Signing in…" : "Sign in"}</button>
       </form>
     </section>}
 

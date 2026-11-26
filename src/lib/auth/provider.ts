@@ -12,7 +12,7 @@ import type { ManagedSessionCookie } from "./http";
  * Revocation: https://www.better-auth.com/docs/concepts/session-management
  */
 export type ProviderResult = { data: unknown; error: null | { status: number; code: string } };
-type Endpoint = "get-session" | "sign-in/email" | "sign-in/social" | "sign-out" |
+type Endpoint = "get-session" | "sign-in/email" | "sign-up/email" | "sign-in/social" | "sign-out" |
   "organization/list" | "organization/get-active-member" | "organization/set-active" | "organization/create";
 
 export function isRecord(value: unknown): value is Record<string, unknown> {
@@ -87,6 +87,9 @@ export function createManagedAuthProvider(
     setActiveOrganization: (organizationId: string) => request("organization/set-active", "POST", { organizationId }),
     createOrganization: (name: string, slug: string) => request("organization/create", "POST", { name, slug, keepCurrentActiveOrganization: false }),
     signInEmail: (email: string, password: string) => request("sign-in/email", "POST", { email, password, rememberMe: true }),
+    signUpEmail: (name: string, email: string, password: string) => request("sign-up/email", "POST", {
+      name, email, password, rememberMe: true, callbackURL: `${config.appOrigin}/account`,
+    }),
     signInGoogle: () => request("sign-in/social", "POST", {
       provider: "google", disableRedirect: true,
       callbackURL: `${config.appOrigin}/auth/callback/google`,

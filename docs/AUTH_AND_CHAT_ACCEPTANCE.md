@@ -9,6 +9,16 @@ second identity server, use a local JWT session cache, or connect to Core's data
 Every protected chat request checks the current provider session and organization
 membership. A browser-provided subject, role, email or tenant cannot grant access.
 
+The account page includes a deliberate Create account option with name, email,
+password and confirmation. Its server route accepts only the registration fields
+and calls the existing managed `sign-up/email` endpoint. It does not accept a role,
+organization, user ID or caller-selected callback. A signed-in outcome requires a
+fresh managed session matching the provider's signup user and submitted email;
+a body token alone cannot establish authentication. A response without that proof
+uses neutral follow-up guidance, including when the provider conceals whether an
+account already exists. Registration does not grant a company workspace or Core
+access. Existing provider email-verification and linking settings are preserved.
+
 A signed-in account with a verified empty workspace list can explicitly create its
 first workspace by entering a display name. The existing Managed Neon organization
 service assigns membership; the app rechecks the initiating user, session, exact
@@ -40,14 +50,23 @@ auth/Core tests. Tests use synthetic sessions/keys/responses; they do not prove 
 real provider grant, a generated response, avatar playback, or production readiness.
 The new CI job also builds the exact source without provider secrets.
 
-At baseline `8b35cb8`, hosted Google sign-in reached account selection and basic
-sign-in consent, then returned without a verified application session. The precise
-provider rejection remains unverified. This revision adds fixed failure guidance
-and allowlisted code-only callback diagnostics. A new hosted callback receipt is
-required; source tests do not establish successful Google sign-in.
+At revision `1eaace0`, hosted Google sign-in reached account selection and basic
+sign-in consent, then returned without a verified application session. The fixed
+callback diagnostic confirmed `GOOGLE_ACCOUNT_LINK_REQUIRED`. This is an existing
+account-linking condition, not evidence that a new Google client repairs it. The
+owner's subsequent email/password attempt was rejected. Source tests do not
+establish a successful hosted login, registration, or workspace creation.
+
+Jeremy has chosen Neon account access for the immediate rollout and deferred
+Google organization changes. See [the account and Google handoff](GOOGLE_INTERNAL_ROLLOUT.md)
+for the intended `xtremeavatar.com` brand/domain and future organization decisions.
 
 Required hosted checks after configuration:
 
+- Complete user-controlled registration, confirm the exact new managed session,
+  and distinguish an existing account, denied signup, verification follow-up and
+  uncertain response. Do not create production test identities or claim an email
+  was verified from an unverified provider field.
 - Sign in, reload, select only a workspace where the user is a member, then sign out.
 - Verify a revoked session and a foreign user/organization cannot call Core.
 - Verify the approved issuer, audience, client and key policy on the exact Core
