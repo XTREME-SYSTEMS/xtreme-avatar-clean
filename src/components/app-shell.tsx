@@ -13,39 +13,26 @@ const bottom = [
   { href: "/create", label: "Create", icon: "imgIconCreate" },
   { href: "/settings", label: "More", icon: "imgIconMore" },
 ];
-const screens: Record<string, string> = {
-  "/": "home", "/invention": "ideas", "/opportunity": "opportunity", "/discovery": "opportunity",
-  "/video": "video", "/voice": "voice", "/tasks": "tasks", "/finished": "finished",
-  "/workspace": "workspace", "/approvals": "approvals", "/contacts": "contacts", "/create": "create",
-};
-const workRoutes = new Set(["/workspace", "/mail", "/drive", "/calendar", "/contacts", "/tasks", "/maps", "/vault", "/wallet", "/notes", "/security", "/images"]);
+const workRoutes = new Set(["/workspace", "/mail", "/drive", "/calendar", "/contacts", "/tasks", "/maps", "/vault", "/wallet", "/notes", "/security", "/images", "/approvals", "/finished"]);
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const focus = pathname === "/video" || pathname === "/create";
-  const screen = screens[pathname] ?? "home";
-  const chromeScreen = focus ? "home" : screen;
-  const active = pathname === "/" ? "/" : workRoutes.has(pathname) ? "/workspace" : pathname === "/create" ? "/create" : "/settings";
+  const workspace = workRoutes.has(pathname) || pathname.startsWith("/approvals/");
+  const active = pathname === "/" || pathname === "/dashboard" ? "/" : workspace ? "/workspace" : pathname === "/create" ? "/create" : "/settings";
 
-  return <div className={`app-frame ${styles.shell} ${focus ? styles.focus : ""}`} data-phone-shell="shared">
-    <div className={styles.backdrop} aria-hidden="true">
-      <PhoneIcon screen={chromeScreen} name="imgV4BrushedAluminumTextureReusable" className={styles.fiber} />
-      <PhoneIcon screen={chromeScreen} name="imgAtmosphereSilverPearlUpperRight" className={styles.upperGlow} />
-      <PhoneIcon screen={chromeScreen} name="imgAtmosphereWhiteGraphiteMiddle" className={styles.middleGlow} />
-      <PhoneIcon screen={chromeScreen} name="imgAtmosphereSilverLowerBevel" className={styles.lowerGlow} />
-      <PhoneIcon screen={chromeScreen} name="imgV4CurvedSilverLightReusable" className={styles.curve} />
-    </div>
-    <div className={styles.deviceChrome} aria-hidden="true"><span>9:41</span><span className={styles.camera} /><span>▰ ▰ ▰</span></div>
+  return <div className={`app-frame ${styles.shell} ${focus ? styles.focus : ""}`} data-app-shell="responsive">
+    <a className={styles.skip} href="#app-content">Skip to content</a>
     <header className="topbar">
       <Link href="/" aria-label="Xtreme Avatar home"><Brand /></Link>
       <Link className="profile-link" href="/account" aria-label="Open your account and workspace"><PhoneIcon screen="home" name="imgIconUser" /></Link>
     </header>
-    <div className="gold-rule" />
-    <main className={`main-content ${styles.content}`} id="app-content" key={pathname}>{children}</main>
-    {!focus && <nav className="bottom-nav" aria-label="Mobile navigation">
+    <main className={`main-content ${styles.content}`} id="app-content" tabIndex={-1} key={pathname}>{children}</main>
+    {!focus && <nav className="bottom-nav" aria-label="App navigation">
       {bottom.map(item => <Link key={item.href} href={item.href} aria-current={active === item.href ? "page" : undefined} className={active === item.href ? "active" : undefined}>
-        <PhoneIcon screen={chromeScreen} name={item.icon} /><span>{item.label}</span>
+        <PhoneIcon screen="home" name={item.icon} /><span>{item.label}</span>
       </Link>)}
     </nav>}
   </div>;
 }
+
