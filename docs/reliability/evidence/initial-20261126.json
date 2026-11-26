@@ -1,0 +1,106 @@
+{
+  "schema": "xtreme-avatar.reliability.receipt.v1",
+  "version": "2026-11-26-v1",
+  "iterationId": "a49794b1-0116-4c8f-b02c-7bd2ff67f56f",
+  "observedAt": "2026-11-26T09:06:57.528Z",
+  "targetRepo": "XTREME-SYSTEMS/xtreme-avatar-clean",
+  "sourceCommit": null,
+  "fingerprint": "87695fdac81728b9d7f2",
+  "summary": {
+    "total": 9,
+    "pass": 9,
+    "fail": 0,
+    "unknown": 0
+  },
+  "remediation": {
+    "status": "healthy",
+    "next": "record_receipt_only",
+    "selfHeal": "none"
+  },
+  "probes": [
+    {
+      "id": "home",
+      "area": "frontend",
+      "result": "PASS",
+      "code": "PASS",
+      "httpStatus": 200,
+      "durationMs": 248,
+      "attempts": 1
+    },
+    {
+      "id": "account",
+      "area": "frontend",
+      "result": "PASS",
+      "code": "PASS",
+      "httpStatus": 200,
+      "durationMs": 496,
+      "attempts": 1
+    },
+    {
+      "id": "dashboard_access",
+      "area": "security",
+      "result": "PASS",
+      "code": "PASS",
+      "httpStatus": 307,
+      "durationMs": 219,
+      "attempts": 1
+    },
+    {
+      "id": "anonymous_session",
+      "area": "security",
+      "result": "PASS",
+      "code": "PASS",
+      "httpStatus": 200,
+      "durationMs": 73,
+      "attempts": 1
+    },
+    {
+      "id": "settings_boundary",
+      "area": "security",
+      "result": "PASS",
+      "code": "PASS",
+      "httpStatus": 401,
+      "durationMs": 154,
+      "attempts": 1
+    },
+    {
+      "id": "outbound_boundary",
+      "area": "security",
+      "result": "PASS",
+      "code": "PASS",
+      "httpStatus": 401,
+      "durationMs": 155,
+      "attempts": 1
+    },
+    {
+      "id": "railway_health",
+      "area": "transport",
+      "result": "PASS",
+      "code": "PASS",
+      "httpStatus": 200,
+      "durationMs": 148,
+      "attempts": 1
+    },
+    {
+      "id": "railway_neon",
+      "area": "database",
+      "result": "PASS",
+      "code": "PASS",
+      "httpStatus": 200,
+      "durationMs": 177,
+      "attempts": 1
+    },
+    {
+      "id": "apex_redirect",
+      "area": "domain",
+      "result": "PASS",
+      "code": "PASS",
+      "httpStatus": 308,
+      "durationMs": 209,
+      "attempts": 1
+    }
+  ],
+  "mutationCount": 0,
+  "guardianCertified": false,
+  "note": "Read-only canary evidence. Foreman repair and independent Guardian verification require separate receipts."
+}

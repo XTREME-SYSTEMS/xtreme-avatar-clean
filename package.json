@@ -10,7 +10,9 @@
     "typecheck": "tsc --noEmit",
     "test:cleanroom": "node --test tests/cleanroom-policy.test.mjs",
     "test:integration": "node --experimental-strip-types --test tests/*.test.ts tests/auth-boundary.test.mjs",
-    "check": "npm run lint && npm run typecheck && npm run test:cleanroom && npm run test:integration"
+    "test:reliability": "node --test tests/reliability-audit.test.mjs",
+    "audit:reliability": "node scripts/reliability/audit.mjs",
+    "check": "npm run lint && npm run typecheck && npm run test:cleanroom && npm run test:integration && npm run test:reliability"
   },
   "dependencies": {
     "@neondatabase/serverless": "1.2.1",
