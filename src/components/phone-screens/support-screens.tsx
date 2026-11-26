@@ -6,6 +6,7 @@ import { PhoneIcon } from "@/components/phone-icon";
 import styles from "./support-screens.module.css";
 
 const menu = [
+  { title: "System Health & Autonomy", detail: "Run live checks and inspect reliability", href: "/settings/system-health", screen: "workspace", icon: "imgIconShield" },
   { title: "Communications settings", detail: "Channels, budgets, consented numbers", href: "/settings/communications", screen: "workspace", icon: "imgIconShield" },
   { title: "Your account", detail: "Sign in and choose your workspace", href: "/account", screen: "home", icon: "imgIconUser" },
   { title: "Chat with Eden", detail: "Messages and conversation history", href: "/chat", screen: "workspace", icon: "imgIconMail" },

@@ -1,0 +1,25 @@
+.screen{display:grid;gap:16px;padding:8px 0 28px;color:#f6f4ee}
+.back{color:#f3d38e;text-decoration:none;font-size:12px}
+.header{display:grid;gap:5px}
+.eyebrow{color:#e6c881;font-weight:700;font-size:10px;letter-spacing:.13em}
+.header h1{font-size:27px;margin:0;line-height:1.18}
+.header p,.panel p{font-size:13px;line-height:1.55;color:#c8cbd0;margin:0}
+.panel{display:grid;gap:14px;border:1px solid #998254;border-radius:16px;padding:18px 14px;background:linear-gradient(150deg,#282d32,#111419);box-shadow:0 3px 14px #0004}
+.panel h2{font-size:17px;margin:0 0 5px}
+.row{display:flex;align-items:start;justify-content:space-between;gap:10px}
+.row>div{min-width:0}
+.pill{font-size:10px;white-space:nowrap;border-radius:99px;border:1px solid #a69264;color:#e7d0a2;padding:5px 8px}
+.action{background:linear-gradient(180deg,#f6dfa6,#bb9655);color:#181813;border:1px solid #f4dc97;border-radius:10px;min-height:46px;font-weight:700;cursor:pointer;font-size:13px}
+.action:disabled{opacity:.5;cursor:default}
+.fine{color:#adb1b8!important;font-size:11px!important}
+.summary{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;font-size:12px}
+.healthy{color:#ace5bd;font-weight:700;font-size:18px}.warning{color:#ffcc92;font-weight:700;font-size:18px}
+.results{display:grid;gap:7px}
+.check{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#10151a;border:1px solid #50575d;border-radius:9px;padding:10px}
+.check>div{min-width:0}.check strong{font-size:12px;display:block}.check small{display:block;color:#b4b8be;font-size:10px;padding-top:3px}
+.good,.bad,.unknown{border:1px solid;border-radius:99px;font-size:10px;font-weight:700;white-space:nowrap;padding:4px 6px}
+.good{color:#aae4bd;border-color:#659575}.bad{color:#ffc2bb;border-color:#ab6d66}.unknown{color:#f3d49b;border-color:#a28d63}
+.outcome{padding:12px;border-left:3px solid #d4b774;background:#222421;border-radius:5px;display:grid;gap:5px}
+.outcome strong{font-size:13px}.outcome p{font-size:11px}
+.error{color:#ffd6d6;background:#351e1e;border:1px solid #ab6666;padding:11px;border-radius:8px;font-size:12px}
+.links{display:flex;gap:12px;flex-wrap:wrap}.links a,.error a{color:#f4d591;font-size:12px}
