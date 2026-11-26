@@ -1,0 +1,100 @@
+@font-face {
+  font-family: "Eden Inter";
+  src: url("/mobile-art/fonts/inter.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Eden Serif";
+  src: url("/mobile-art/fonts/instrument-serif.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+.page {
+  --paper: #f4f1ec;
+  background: #151515;
+  color: var(--paper);
+  min-height: 100dvh;
+  font: 400 1rem/1.5 "Eden Inter", Arial, sans-serif;
+}
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 4.5rem;
+  padding: .5rem clamp(1.25rem, 5vw, 5rem);
+  border-bottom: 1px solid #363635;
+}
+.wordmark {
+  font-size: 1.15rem;
+  font-weight: 750;
+  letter-spacing: -.07em;
+}
+.wordmark span { font-weight: 400; }
+.header nav { display: flex; gap: clamp(.85rem, 3vw, 2rem); }
+.header nav a { color: #d4d1cd; font-size: .875rem; }
+.header a { display: inline-flex; align-items: center; min-height: 44px; }
+.page a:focus-visible, .page button:focus-visible, .page textarea:focus-visible {
+  outline: 2px solid #c6dcff;
+  outline-offset: 4px;
+}
+.header nav a:hover { color: white; text-decoration: underline; text-underline-offset: .3em; }
+.main {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr);
+  min-height: calc(100dvh - 4.5rem);
+}
+.portrait {
+  grid-column: 2;
+  grid-row: 1;
+  background: #353532 url("/mobile-art/eden-video.webp") 50% 38% / cover no-repeat;
+  filter: grayscale(1);
+  align-self: start;
+  position: sticky;
+  top: 0;
+  height: calc(100svh - 4.5rem);
+}
+.conversation {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: center;
+  min-width: 0;
+  padding: clamp(2.5rem, 6vw, 7rem);
+}
+.conversation h1 {
+  font: 400 clamp(4.5rem, 7.7vw, 8rem)/.98 "Eden Serif", Georgia, serif;
+  letter-spacing: -.048em;
+  margin: 0 0 1.4rem;
+}
+.conversation h1 i { font-style: italic; }
+.conversation:has(form, article) { align-self: start; }
+.conversation:has(form, article) h1 { font-size: clamp(3.25rem, 5vw, 5rem); }
+@media (max-width: 720px) {
+  .header { min-height: 3.75rem; padding-inline: 1.25rem; }
+  .main { display: flex; flex-direction: column; min-height: calc(100dvh - 3.75rem); }
+  .portrait {
+    position: static;
+    align-self: stretch;
+    height: clamp(12rem, 36svh, 20rem);
+    background-position: 50% 33%;
+  }
+  .conversation { align-self: stretch; padding: 2rem 1.5rem max(2.5rem, env(safe-area-inset-bottom)); }
+  .conversation h1 { font-size: clamp(3.75rem, 15vw, 5.25rem); margin-bottom: .9rem; }
+  .main:has(form, article) .portrait { display: none; }
+  .conversation:has(form, article) { align-self: stretch; }
+}
+.handoff p { margin: 0 0 1.7rem; color: #cbc7c0; font-size: 1.05rem; line-height: 1.6; }
+.handoff a {
+  display: inline-flex;
+  align-items: center;
+  gap: 1.6rem;
+  padding: .75rem 1.15rem;
+  min-height: 46px;
+  background: #f0ede7;
+  color: #151515;
+  border-radius: .4rem;
+  font-weight: 650;
+  font-size: .95rem;
+}
+.handoff a:hover { background: white; }
+.handoff a span { font-size: 1.1rem; }

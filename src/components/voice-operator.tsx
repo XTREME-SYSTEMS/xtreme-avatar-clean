@@ -80,7 +80,7 @@ export function VoiceOperator({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const voicePage = pathname === "/voice" || pathname === "/mobile/voice";
-  const authPage = pathname === "/account" || pathname === "/reset-password" || pathname === "/forgot-password";
+  const hideIdleLauncher = pathname === "/eden" || pathname === "/account" || pathname === "/reset-password" || pathname === "/forgot-password";
   const [open, setOpen] = useState(false);
   const [availability, setAvailability] = useState<Availability>("checking");
   const [phase, setPhase] = useState<Phase>("idle");
@@ -246,7 +246,7 @@ export function VoiceOperator({ children }: { children: ReactNode }) {
   return <VoiceContext.Provider value={{ availability, phase, muted, message, transcript, start, stop, toggleMute, getScope, receiveAudio,
     review: displayedReview?.label ?? "", confirm: () => { void confirm(displayedReview?.id); }, cancel }}>
     {children}
-    {!voicePage && (!authPage || phase !== "idle") && <div className={styles.launcher}>
+    {!voicePage && (!hideIdleLauncher || phase !== "idle") && <div className={styles.launcher}>
       {open ? <section className={styles.popup} aria-label="Persistent Eden voice">
         <div className={styles.header}><b>Talk to Eden</b><button type="button" onClick={() => setOpen(false)} aria-label="Minimize voice panel">−</button></div>
         <VoiceOperatorPanel />
